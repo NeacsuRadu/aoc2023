@@ -98,14 +98,45 @@ def getLastDigitInString(s):
             return 8
     print(f'last {s}')
 
-lines = readInputFile("./input/input1_2.txt")
+def day_1():
+    lines = readInputFile("./input/input1_2.txt")
 
-calibrationSum = 0
-for line in lines:
-    firstDigit = getFirstDigitInString(line)
-    lastDigit = getLastDigitInString(line)
+    calibrationSum = 0
+    for line in lines:
+        firstDigit = getFirstDigitInString(line)
+        lastDigit = getLastDigitInString(line)
 
-    calibrationValue = lastDigit if firstDigit == 0 else firstDigit * 10 + lastDigit
-    calibrationSum += calibrationValue
+        calibrationValue = lastDigit if firstDigit == 0 else firstDigit * 10 + lastDigit
+        calibrationSum += calibrationValue
 
-print(calibrationSum)
+    print(calibrationSum)
+
+def day_2():
+    lines = readInputFile("./input/input2_1.txt")
+
+    sum = 0
+
+    for line in lines:
+        maxRed = None
+        maxGreen = None
+        maxBlue = None
+        game, rounds = line.split(":")
+        for round in rounds.split(";"):
+            cubes = round.split(",")
+            for cube in cubes:
+                if "blue" in cube:
+                    blueCubes = int(cube.split(" blue")[0])
+                    if maxBlue is None or blueCubes > maxBlue:
+                        maxBlue = blueCubes
+                if "red" in cube:
+                    redCubes = int(cube.split(" red")[0])
+                    if maxRed is None or redCubes > maxRed:
+                        maxRed = redCubes
+                if "green" in cube:
+                    greenCubes = int(cube.split(" green")[0])
+                    if maxGreen is None or greenCubes > maxGreen:
+                        maxGreen = greenCubes
+        sum += maxRed * maxGreen * maxBlue
+    print(sum)
+
+day_2()
