@@ -2,7 +2,10 @@ def readInputFile(path):
     result = []
     with open(path, 'r') as f:
         for line in f:
-            result.append(line[0: -1])
+            if line[len(line) - 1] == '\n':
+                result.append(line[0: -1])
+            else:
+                result.append(line)
     return result
 
 def isDigit(c):
@@ -139,4 +142,69 @@ def day_2():
         sum += maxRed * maxGreen * maxBlue
     print(sum)
 
-day_2()
+def day_3():
+    lines = readInputFile("./input/input3_1.txt")
+
+    partNumbers = []
+    starSymbols = {}
+
+    lineCount = len(lines)
+    columnCount = len(lines[0])
+
+    for l in range(lineCount):
+        partNumber = None
+        numberStart = None
+        numberEnd = None
+        for c in range(columnCount):
+            if lines[l][c].isdigit():
+                if partNumber is None:
+                    partNumber = int(lines[l][c])
+                    numberStart = c
+                    numberEnd = c
+                else:
+                    partNumber = partNumber * 10 + int(lines[l][c])
+                    numberEnd = c
+            
+            if not lines[l][c].isdigit() or c == columnCount - 1:
+                if partNumber is not None:
+                    # print(f'{partNumber} - {numberStart} - {numberEnd}')
+                    minLine = max(l - 1, 0)
+                    maxLine = min(l + 1, lineCount - 1)
+
+                    minColumn = max(numberStart - 1, 0)
+                    maxColumn = min(numberEnd + 1, columnCount - 1)
+
+                    # print(partNumber)
+                    # print(f'line {minLine} {maxLine} col {minColumn} {maxColumn}')
+                    isPartNumber = False
+                    for i in range(minLine, maxLine + 1):
+                        for j in range(minColumn, maxColumn + 1):
+                            if lines[i][j] == "*":
+                                if starSymbols.get(f'{i}_{j}') is None:
+                                    starSymbols[f'{i}_{j}'] = [partNumber]
+                                else:
+                                    starSymbols.get(f'{i}_{j}').append(partNumber)
+                                
+                            if not lines[i][j].isdigit() and lines[i][j] != '.':
+                                isPartNumber = True
+                    
+                    # print(isPartNumber)
+                    if isPartNumber:
+                        partNumbers.append(partNumber)
+
+                    partNumber = None
+                    numberStart = None
+                    numberEnd = None
+    sum = 0
+    for n in partNumbers:
+        sum += n
+    
+    print(sum)
+    
+    sum2 = 0
+    for key in starSymbols:
+        if len(starSymbols.get(key)) == 2:
+            sum2 += starSymbols.get(key)[0] * starSymbols.get(key)[1]
+    print(sum2)
+
+day_3()
