@@ -1,3 +1,5 @@
+import re
+
 def readInputFile(path):
     result = []
     with open(path, 'r') as f:
@@ -207,4 +209,33 @@ def day_3():
             sum2 += starSymbols.get(key)[0] * starSymbols.get(key)[1]
     print(sum2)
 
-day_3()
+def day_4():
+    lines = readInputFile("./input/input4.txt")
+
+    sum = 0
+    multipliers = {}
+    for i in range(len(lines)):
+        card = lines[i]
+        winningNumbersString = ((card.split(':')[1]).split("|")[0])
+        winningNumbers = [int(x) for x in re.split(r' +', winningNumbersString)[1:-1]]
+
+        chosenNumbersString = ((card.split(':')[1]).split("|")[1])
+        chosenNumbers = [int(x) for x in re.split(r' +', chosenNumbersString)[1:]]
+
+        matchingNumbers = 0
+        for winningNumber in winningNumbers:
+            if winningNumber in chosenNumbers:
+                matchingNumbers += 1
+
+        currentCardMultiplier = multipliers.get(i) if multipliers.get(i) is not None else 1
+        sum += currentCardMultiplier
+        if matchingNumbers > 0:
+            for j in range(i + 1, i + matchingNumbers + 1):
+                if multipliers.get(j) is None:
+                    multipliers[j] = 1 + currentCardMultiplier
+                else:
+                    multipliers[j] += currentCardMultiplier
+    
+    print(sum)
+
+day_4()
