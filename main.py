@@ -350,4 +350,38 @@ def day_5():
 
 
 def day_6():
+    lines = readInputFile("./input/input6.txt")
+
+    # times = [int(x) for x in re.split(r" +", lines[0].split(":")[1])[1:]]
+    # distances = [int(x) for x in re.split(r" +", lines[1].split(":")[1])[1:]]
+    # print(times)
+    # print(distances)
+
+    time = int("".join(re.split(r" +", lines[0].split(":")[1])))
+    recordDistance = int("".join(re.split(r" +", lines[1].split(":")[1])))
+
     
+    # product = 1
+    # for i in range(len(times)):
+    #     time = times[i]
+    #     recordDistance = distances[i]
+
+    #     count = 0
+
+    #     for j in range(0, time + 1, 1):
+    #         distance = (time - j) * j
+    #         if distance > recordDistance:
+    #             count += 1
+        
+    #     product *= count
+    
+    # print(product)
+    count = 0
+    for j in range(0, time + 1, 1):
+        distance = (time - j) * j
+        if distance > recordDistance:
+            count += 1
+    
+    print(count)
+
+day_6()
