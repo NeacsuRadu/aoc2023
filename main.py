@@ -238,4 +238,116 @@ def day_4():
     
     print(sum)
 
-day_4()
+def sortingFunction(r):
+    return r[1]
+
+def day_5():
+    lines = readInputFile("./input/input5.txt")
+
+    # seeds = [int (x) for x in lines[0].split(":")[1].split(" ") if x != ""]
+    seedPairsRaw = [int (x) for x in lines[0].split(":")[1].split(" ") if x != ""]
+    # seeds = []
+    # for i in range(0, len(seedPairs), 2):
+    #     start = seedPairs[i]
+    #     seedRangeLength = seedPairs[i + 1]
+    #     for j in range(seedRangeLength):
+    #         seeds.append(start + j)
+    seedPairs = []
+    for i in range(0, len(seedPairsRaw), 2):
+        seedPairs.append([seedPairsRaw[i], seedPairsRaw[i] + seedPairsRaw[i+1] - 1])
+    
+    maps = []
+    ranges = {}
+    current_range = None
+    for i in range(2, len(lines)):
+        line = lines[i]
+
+        if "map" in line:
+            if current_range is not None:
+                ranges.get(current_range).sort(key=sortingFunction)
+
+            current_range = line.split(" ")[0]
+            ranges[current_range] = []
+            maps.append(current_range)
+        elif line == "":
+            continue
+        else:
+            numbers = [int(x) for x in line.split(" ") if x != ""]
+            ranges.get(current_range).append(numbers)
+
+    ranges.get(current_range).sort(key=sortingFunction)
+
+    # print(ranges)   
+    # print(maps)
+
+    # closestLocation = None
+    # print(len(seeds))
+    # for seed in seeds:
+    #     convertedNumber = seed
+
+    #     for m in maps:
+    #         rangesForMap = ranges.get(m)
+
+    #         for currentRange in rangesForMap:
+    #             # print(currentRange)
+    #             if currentRange[1] <= convertedNumber and (currentRange[1] + currentRange[2]) >= convertedNumber:
+    #                 # print("found")
+    #                 convertedNumber = currentRange[0] + (convertedNumber - currentRange[1])
+    #                 break
+            
+    #         # print(convertedNumber)
+        
+    #     if closestLocation is None or convertedNumber < closestLocation:
+    #         closestLocation = convertedNumber
+
+    pairs = []
+    closestLocation = None
+    for seedPair in seedPairs:
+        # print(f"processing seed pair {seedPair}")
+        pairs = [seedPair]
+
+        for m in maps:
+            # print(f"input for map {m}: {pairs}")
+            rangesForMap = ranges.get(m)
+
+            newPairs = []
+
+            for pair in pairs:
+                left = pair[0]
+                right = pair[1]
+
+                for currentRange in rangesForMap:
+                    if currentRange[1] + currentRange[2] - 1 < left:
+                        continue
+                    elif right < currentRange[1]:
+                        continue
+                    else:
+                        # uncovered left
+                        if currentRange[1] > left:
+                            newPairs.append([left, currentRange[1] - 1])
+
+                        newLeft = max(left, currentRange[1])
+                        newRight = min(right, currentRange[1] + currentRange[2] - 1)
+
+                        newPairs.append([currentRange[0] + newLeft - currentRange[1], currentRange[0] + newRight - currentRange[1]])
+
+                        left = newRight + 1
+                        if left > right:
+                            break
+                
+                if left <= right:
+                    newPairs.append([left, right])
+                
+            pairs = newPairs
+        for pair in pairs:
+            if closestLocation is None or pair[0] < closestLocation:
+                closestLocation = pair[0]
+            
+        
+    # print(pairs)
+    print(f"closest location is {closestLocation}")
+    # closest location is 227653707
+
+
+def day_6():
+    
