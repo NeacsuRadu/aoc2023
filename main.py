@@ -384,4 +384,107 @@ def day_6():
     
     print(count)
 
-day_6()
+import functools
+def day7sort(a, b):
+    if a.get("typeN") > b.get("typeN"):
+        return 1
+    if a.get("typeN") < b.get("typeN"):
+        return -1
+
+    cardsValues = "J23456789TQKA"
+    for i in range(5):
+        ca = cardsValues.index(a.get("cards")[i])
+        cb = cardsValues.index(b.get("cards")[i])
+        if ca < cb:
+            return -1
+        if ca > cb:
+            return 1
+    return 0
+            
+        
+
+def day_7():
+    lines = readInputFile("./input/input7.txt")
+
+    hands = []
+    for line in lines:
+        cards = line.split(" ")[0]
+        bid = int(line.split(" ")[1])
+
+        aux = {}
+        for c in cards:
+            if aux.get(c) is None:
+                aux[c] = 0
+
+            aux[c] += 1
+        
+        handType = None
+        handTypeN = None
+        if len(aux) == 1:
+            handType = "five"
+            handTypeN = 6
+        elif len(aux) == 2:
+            if 1 in aux.values() or 4 in aux.values():
+                if "J" in aux:
+                    handType = "five"
+                    handTypeN = 6
+                else:
+                    handType = "four"
+                    handTypeN = 5
+            else:
+                if "J" in aux:
+                    handType = "five"
+                    handTypeN = 6
+                else:
+                    handType = "full"
+                    handTypeN = 4
+        elif len(aux) == 3:
+            if 3 in aux.values():
+                if "J" in aux:
+                    handTypeN = "four"
+                    handTypeN = 5
+                else:
+                    handType = "three"
+                    handTypeN = 3
+            else:
+                if "J" in aux:
+                    if aux.get("J") == 1:
+                        handType = "full"
+                        handTypeN = 4
+                    else:
+                        handType = "four"
+                        handTypeN = 5
+                else:
+                    handType = "two"
+                    handTypeN = 2
+        elif len(aux) == 4:
+            if "J" in aux:
+                handType = "three"
+                handTypeN = 3
+            else:
+                handType = "one"
+                handTypeN = 1
+        else:
+            if "J" in aux:
+                handType = "one"
+                handTypeN = 1
+            else:
+                handType = "high"
+                handTypeN = 0
+
+        hands.append({
+            "cards": cards,
+            "bid": bid,
+            "type": handType,
+            "typeN": handTypeN
+        })
+    
+    hands.sort(key=functools.cmp_to_key(day7sort))
+    
+    sum = 0
+    for i in range(len(hands)):
+        sum += (i + 1) * hands[i]["bid"]
+
+    print(sum)
+
+day_7()
