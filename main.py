@@ -487,4 +487,86 @@ def day_7():
 
     print(sum)
 
-day_7()
+def gdc(a, b):
+    # if a == b:
+    #     return a
+
+    # if a > b:
+    #     return gdc(a - b, b)
+    # else:
+    #     return gdc(a, b - a)
+    while a != b:
+        if a > b:
+            a, b = a - b, b
+        else:
+            a, b = a, b - a 
+    
+    return a
+
+def lca(a, b):
+    return (a * b) / gdc(a, b)
+
+def day8():
+    lines = readInputFile("./input/input8.txt")
+
+    sequence = lines[0]
+    elements = {}
+
+    startingElements = []
+
+    for i in range(2, len(lines)):
+        line = lines[i]
+        element, moves = line.split(" = (")
+        leftMove, rightMove = moves.split(", ")
+
+        elements[element] = {
+            "left": leftMove,
+            "right": rightMove[:-1]
+        }
+
+        if element[-1] == 'A':
+            startingElements.append(element)
+    
+    stepsForEachElem = []
+    for startingElement in startingElements:
+        index = 0
+        steps = 0
+        currentElement = startingElement
+
+
+        found = 0
+
+        while True:
+            steps += 1
+            move = sequence[index]
+
+            currentElementMoves = elements.get(currentElement)
+            if move == "L":
+                currentElement = currentElementMoves["left"]
+            else:
+                currentElement = currentElementMoves["right"]
+            
+            if currentElement[-1] == "Z":
+                found += 1
+                if found == 1:
+                    stepsForEachElem.append(steps)
+                    break
+            
+            if index == len(sequence) - 1:
+                index = 0
+            else:
+                index += 1
+
+    print (stepsForEachElem)
+    result = lca(stepsForEachElem[0], stepsForEachElem[1])
+    i = 2
+    while i < len(stepsForEachElem):
+        print(result)
+        currentSteps = stepsForEachElem[i]
+
+        result = lca(result, currentSteps)
+        i += 1
+
+    print(result)
+
+day8()
