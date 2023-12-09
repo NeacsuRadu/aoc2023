@@ -569,4 +569,52 @@ def day8():
 
     print(result)
 
-day8()
+def day9():
+    lines = readInputFile("./input/input9.txt")
+
+    sum = 0
+    firstSum = 0
+    for line in lines:
+        numbers = [int(x) for x in line.split(" ")]
+
+        firstValues = []
+        lastValues = []
+        
+        while True:
+            firstValues.append(numbers[0])
+            lastValues.append(numbers[-1])
+
+            shouldStop = True
+
+            newNumbers = []
+            for i in range(1, len(numbers)):
+                diff = numbers[i] - numbers[i-1]
+                
+                newNumbers.append(diff)
+
+                if diff != 0:
+                    shouldStop = False
+            
+            if shouldStop:
+                break
+                
+            numbers = newNumbers
+        
+        currentSum = 0
+        for l in lastValues:
+            currentSum += l
+        
+        sum += currentSum
+
+        currentFirstSum = 0
+        for i in range(len(firstValues) - 1, -1, -1):
+            f = firstValues[i]
+
+            currentFirstSum = f - currentFirstSum
+
+        firstSum += currentFirstSum
+
+    print(sum)
+    print(firstSum)
+
+day9()
