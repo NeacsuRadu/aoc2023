@@ -617,4 +617,55 @@ def day9():
     print(sum)
     print(firstSum)
 
-day9()
+def day10():
+    nextPositions = {
+        "|": [[-1, 0], [1, 0]],
+        "-": [[0, -1], [0, 1]],
+        "L": [[-1, 0], [0, 1]],
+        "J": [[-1, 0], [0, -1]],
+        "7": [[0, -1], [1, 0]],
+        "F": [[0, 1], [1, 0]],
+        # "S": [[0, 1], [1, 0]]
+        "S": [[-1, 0], [0, 1]]
+    }
+
+    lines = readInputFile("./input/input10.txt")
+
+    startLine = None
+    startColumn = None
+    for i in range(len(lines)):
+        for j in range(len(lines[i])):
+            if lines[i][j] == "S":
+                startLine = i
+                startColumn = j
+    
+    maxD = 1
+    q = [{"l": startLine, "c": startColumn, "d": 0}]
+    vis = {
+        f"{startLine}_{startColumn}": 1
+    }
+
+    while len(q) > 0:
+        e = q.pop(0)
+
+        l = e.get("l")
+        c = e.get("c")
+        dist = e.get("d")
+        pipeType = lines[e.get("l")][e.get("c")]
+
+        nextMoves = nextPositions.get(pipeType)
+        for next in nextMoves:
+            key = f"{l + next[0]}_{c + next[1]}"
+
+            if vis.get(key) == 1:
+                continue
+                
+            
+            vis[key] = 1
+            q.append({"l": l + next[0], "c": c + next[1], "d": dist + 1})
+            if dist + 1 > maxD:
+                maxD = dist + 1       
+    
+    print(maxD)
+
+day10()
