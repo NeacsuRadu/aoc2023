@@ -617,6 +617,199 @@ def day9():
     print(sum)
     print(firstSum)
 
+# def day10():
+#     nextPositions = {
+#         "|": [[-1, 0], [1, 0]],
+#         "-": [[0, -1], [0, 1]],
+#         "L": [[-1, 0], [0, 1]],
+#         "J": [[-1, 0], [0, -1]],
+#         "7": [[0, -1], [1, 0]],
+#         "F": [[0, 1], [1, 0]],
+#         # "S": [[0, 1], [1, 0]]
+#         "S": [[-1, 0], [0, 1]]
+#     }
+
+#     lines = readInputFile("./input/input10.txt")
+
+#     startLine = None
+#     startColumn = None
+#     for i in range(len(lines)):
+#         for j in range(len(lines[i])):
+#             if lines[i][j] == "S":
+#                 startLine = i
+#                 startColumn = j
+    
+#     maxD = 1
+#     q = [{"l": startLine, "c": startColumn, "d": 0}]
+#     vis = {
+#         f"{startLine}_{startColumn}": 1
+#     }
+
+#     while len(q) > 0:
+#         e = q.pop(0)
+
+#         l = e.get("l")
+#         c = e.get("c")
+#         dist = e.get("d")
+#         pipeType = lines[e.get("l")][e.get("c")]
+
+#         nextMoves = nextPositions.get(pipeType)
+#         for next in nextMoves:
+#             key = f"{l + next[0]}_{c + next[1]}"
+
+#             if vis.get(key) == 1:
+#                 continue
+                
+            
+#             vis[key] = 1
+#             q.append({"l": l + next[0], "c": c + next[1], "d": dist + 1})
+#             if dist + 1 > maxD:
+#                 maxD = dist + 1       
+    
+#     print(maxD)
+
+# def day10():
+#     nextPositions = {
+#         "|": [[-1, 0, None, None], [1, 0, None, None]],
+#         "-": [[0, -1, None, None], [0, 1, None, None]],
+#         "L": [[-1, 0, "r", {"r": [0, 1], "l": [0, -1]}], [0, 1, "l", {"r": [1, 0], "l": [-1, 0]}]],
+#         "J": [[-1, 0, "l", {"r": [0, 1], "l": [0, -1]}], [0, -1, "r", {"r": [-1, 0], "l": [1, 0]}]],
+#         "7": [[0, -1, "l", {"r": [-1, 0], "l": [1, 0]}], [1, 0, "r", {"r": [0, -1], "l": [0, 1]}]],
+#         "F": [[0, 1, "r", {"r": [1, 0], "l": [-1, 0]}], [1, 0, "l", {"r": [0, -1], "l": [0, 1]}]],
+#         "S": [[1, 0, None, {"r": [0, -1], "l": [0, 1]}], [0, 1, None, {"r": [1, 0], "l": [-1, 0]}]] # test 1 and 3 and 4 and 5
+#         # "S": [[-1, 0, None, {"r": [0, -1], "l": [0, 1]}], [0, 1, None, {"r": [1, 0], "l": [-1, 0]}]] # test 2
+#     }
+
+#     lines = readInputFile("./input/input10test5.txt")
+
+#     startLine = None
+#     startColumn = None
+#     for i in range(len(lines)):
+#         for j in range(len(lines[i])):
+#             if lines[i][j] == "S":
+#                 startLine = i
+#                 startColumn = j
+    
+#     # to be init by input, test 1&3&4 counter clockwise
+#     q = [{"l": startLine + 1, "c": startColumn}]
+#     vis = {
+#         f"{startLine}_{startColumn}": 1,
+#         f"{startLine + 1}_{startColumn}": 1
+#     }
+#     turns = {
+#         "l": 1,
+#         "r": 0
+#     }
+#     # to be init by input, test 1&3&4 clockwise
+#     # q = [
+#     #     {"l": startLine, "c": startColumn + 1}
+#     # ]
+#     # vis = {
+#     #     f"{startLine}_{startColumn}": 1,
+#     #     f"{startLine}_{startColumn + 1}": 1
+#     # }
+#     # turns = {
+#     #     "l": 0,
+#     #     "r": 1
+#     # }
+#     while len(q) > 0:
+#         e = q.pop(0)
+
+#         l = e.get("l")
+#         c = e.get("c")
+#         pipeType = lines[e.get("l")][e.get("c")]
+
+#         nextMoves = nextPositions.get(pipeType)
+#         for next in nextMoves:
+#             key = f"{l + next[0]}_{c + next[1]}"
+
+#             if vis.get(key) == 1:
+#                 continue
+                
+            
+#             vis[key] = 1
+#             q.append({"l": l + next[0], "c": c + next[1]})   
+#             if next[2] is not None:
+#                 turns[next[2]] += 1
+    
+#     side = "r" if turns["r"] > turns["l"] else "l"
+#     print(side)
+#     print(turns)
+
+#     finalQ = []
+#     finalVis = {}
+#     finalCount = 0
+
+#     # q2 = [
+#     #     {"l": startLine, "c": startColumn + 1}
+#     # ]
+#     # vis2 = {
+#     #     f"{startLine}_{startColumn}": 1,
+#     #     f"{startLine}_{startColumn + 1}": 1
+#     # }
+#     q2 = [{"l": startLine + 1, "c": startColumn}]
+#     vis2 = {
+#         f"{startLine}_{startColumn}": 1,
+#         f"{startLine + 1}_{startColumn}": 1
+#     }
+
+#     s = nextPositions.get("S")[0]
+#     whereToLook = [s[3].get(side)[0], s[3].get(side)[1]]
+#     while len(q2) > 0:
+#         e = q2.pop(0)
+
+#         l = e.get("l")
+#         c = e.get("c")
+#         pipeType = lines[e.get("l")][e.get("c")]
+
+#         if pipeType == "-" or pipeType == "|":
+#             newL = l + whereToLook[0]
+#             newC = c + whereToLook[1]
+#             newKey = f"{newL}_{newC}"
+#             if newL >= 0 and newL < len(lines) and newC >= 0 and newC < len(lines[0]) and vis.get(newKey) == None and finalVis.get(newKey) == None:
+#                 finalQ.append({"l": newL, "c": newC})
+#                 finalVis[newKey] = 1
+#                 finalCount += 1
+        
+#         nextMoves = nextPositions.get(pipeType)
+#         for next in nextMoves:
+#             key = f"{l + next[0]}_{c + next[1]}"
+
+#             if vis2.get(key) == 1:
+#                 continue
+
+#             vis2[key] = 1
+
+#             q2.append({"l": l + next[0], "c": c + next[1]})
+
+#             if next[3] is not None:
+#                 whereToLook = [next[3].get(side)[0], next[3].get(side)[1]]
+    
+#     moves = [[-1, 0], [1, 0], [0, -1], [0, 1]]
+#     print(f"final q {finalQ}")
+#     while len(finalQ):
+#         e = finalQ.pop(0)
+
+#         l = e.get("l")
+#         c = e.get("c")
+
+#         for move in moves:
+#             newL = l + move[0]
+#             newC = c + move[1]
+            
+#             newKey = f"{newL}_{newC}"
+
+#             if vis.get(newKey) == 1 or finalVis.get(newKey) == 1:
+#                 continue
+            
+#             finalVis[newKey] = 1
+
+#             finalCount += 1
+#             finalQ.append({"l": newL, "c": newC})
+   
+
+#     print(finalCount)
+
 def day10():
     nextPositions = {
         "|": [[-1, 0], [1, 0]],
@@ -625,8 +818,8 @@ def day10():
         "J": [[-1, 0], [0, -1]],
         "7": [[0, -1], [1, 0]],
         "F": [[0, 1], [1, 0]],
-        # "S": [[0, 1], [1, 0]]
-        "S": [[-1, 0], [0, 1]]
+        "S": [[0, 1], [1, 0]]
+        # "S": [[-1, 0], [0, 1]]
     }
 
     lines = readInputFile("./input/input10.txt")
@@ -638,8 +831,8 @@ def day10():
             if lines[i][j] == "S":
                 startLine = i
                 startColumn = j
+    sVal = "L"
     
-    maxD = 1
     q = [{"l": startLine, "c": startColumn, "d": 0}]
     vis = {
         f"{startLine}_{startColumn}": 1
@@ -663,9 +856,41 @@ def day10():
             
             vis[key] = 1
             q.append({"l": l + next[0], "c": c + next[1], "d": dist + 1})
-            if dist + 1 > maxD:
-                maxD = dist + 1       
-    
-    print(maxD)
+
+    count = 0
+    for i in range(len(lines)):
+        for j in range(len(lines[i])):
+            key = f"{i}_{j}"
+
+            if vis.get(key) == 1:
+                continue
+            
+            intersections = 0
+            lastIntersection = None
+            for k in range(j + 1, len(lines[i])):
+                newKey = f"{i}_{k}"
+
+                val = sVal if lines[i][k] == "S" else lines[i][k]
+                if vis.get(newKey) == 1:
+                    if val == "|":
+                        intersections += 1
+                    elif val == "F":
+                        intersections += 1
+                        lastIntersection = "F"
+                    elif val == "7" and lastIntersection == "F":
+                        intersections += 1
+                        lastIntersection = None
+                    elif val == "L":
+                        intersections += 1
+                        lastIntersection = "L"
+                    elif val == "J" and lastIntersection == "L":
+                        intersections += 1
+                        lastIntersection = None
+
+            if intersections % 2 == 1:
+                print(f"{i} {j}")
+                count += 1
+
+    print(count)   
 
 day10()
