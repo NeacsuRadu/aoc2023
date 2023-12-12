@@ -891,6 +891,106 @@ def day10():
                 print(f"{i} {j}")
                 count += 1
 
-    print(count)   
+    print(count)
 
-day10()
+def printMatrix(m):
+    for i in range(len(m)):
+        for j in range(len(m[i])):
+            print(f"{m[i][j]} ", end="")
+        
+        print("\n")
+
+def day11():
+    inputLines = readInputFile("./input/input11.txt")
+
+    lines = {}
+    columns = {}
+
+    for i in range(len(inputLines)):
+        for j in range(len(inputLines[0])):
+            if inputLines[i][j] == "#":
+                lines[i] = 1
+                columns[j] = 1
+    
+    # print(lines.keys())
+    # print(columns.keys())
+    # printMatrix(inputLines)
+
+    newImage = []
+    numberOfColumns = 2 * len(inputLines[0]) - len(columns.keys())
+    for i in range(len(inputLines)):
+        if lines.get(i) == None:
+            for _ in range(2):
+                newImage.append([])
+                currentLine = len(newImage) - 1
+
+                for _ in range(numberOfColumns):
+                    newImage[currentLine].append(".")
+        else:
+            newImage.append([])
+            currentLine = len(newImage) - 1
+            for j in range(len(inputLines[0])):
+                if columns.get(j) == None:
+                    newImage[currentLine].append(".")
+                
+                newImage[currentLine].append(inputLines[i][j])
+    
+    stars = []
+    for i in range(len(newImage)):
+        for j in range(len(newImage[i])):
+            if newImage[i][j] == "#":
+                stars.append([i, j])
+    
+    sum = 0
+    for i in range(len(stars) - 1):
+        for j in range(i + 1, len(stars)):
+            sum += abs(stars[i][0] - stars[j][0]) + abs(stars[i][1] - stars[j][1])
+
+    print(sum)
+
+def day11_2():
+    inputLines = readInputFile("./input/input11.txt")
+
+    lines = {}
+    columns = {}
+    stars = []
+
+    expansion = 1000000 # later 10, 100, 1000000
+
+    for i in range(len(inputLines)):
+        for j in range(len(inputLines[0])):
+            if inputLines[i][j] == "#":
+                lines[i] = 1
+                columns[j] = 1
+                stars.append([i, j])
+    
+    emptyLines = []
+    for i in range(len(inputLines)):
+        if lines.get(i) is None:
+            emptyLines.append(i)
+    
+    emptyColumns = []
+    for i in range(len(inputLines[0])):
+        if columns.get(i) is None:
+            emptyColumns.append(i)
+    
+    # print(lines.keys())
+    # print(columns.keys())
+    # printMatrix(inputLines)
+
+    sum = 0
+    for i in range(len(stars) - 1):
+        for j in range(i + 1, len(stars)):
+            minLine = min(stars[i][0], stars[j][0])
+            maxLine = max(stars[i][0], stars[j][0])
+            eL = len(list(filter(lambda x: x > minLine and x < maxLine, emptyLines)))
+
+            minColumn = min(stars[i][1], stars[j][1])
+            maxColumn = max(stars[i][1], stars[j][1])
+            eC = len(list(filter(lambda x: x > minColumn and x < maxColumn, emptyColumns)))
+
+            sum += abs(stars[i][0] - stars[j][0]) + abs(stars[i][1] - stars[j][1]) + (expansion - 1) * eL + (expansion - 1) * eC
+
+    print(sum)
+
+day11_2()
