@@ -962,6 +962,8 @@ def day11_2():
             if inputLines[i][j] == "#":
                 lines[i] = 1
                 columns[j] = 1
+
+                
                 stars.append([i, j])
     
     emptyLines = []
@@ -993,4 +995,84 @@ def day11_2():
 
     print(sum)
 
-day11_2()
+def iterate(firstNotation, secondNotation):
+    print(f"{firstNotation} - {secondNotation}")
+    firstIndex = 0
+    secondIndex = 0
+    while firstIndex < len(firstNotation) and firstNotation[firstIndex] != "?":
+        print(firstIndex)
+        if firstNotation[firstIndex] == ".":
+            firstIndex += 1
+            continue
+
+        if secondIndex == len(secondNotation):
+            return 0
+        
+        nextGroup = secondNotation[secondIndex]
+
+        for i in range(firstIndex, firstIndex + nextGroup):
+            if i == len(firstNotation) or firstNotation[i] == ".":
+                return 0
+        
+        if firstIndex + nextGroup == len(firstNotation) or firstNotation[firstIndex + nextGroup] == "#":
+            return 0
+        
+        firstIndex = firstIndex + nextGroup + 1
+        secondIndex += 1
+    
+    if firstIndex == len(firstNotation):
+        if secondIndex == len(secondNotation):
+            return 1
+        return 0
+
+    # if secondIndex == len(secondNotation):
+    #     if "#" in firstNotation[firstIndex:]:
+
+    # case 1 make ? as .
+    result1 = iterate(firstNotation[firstIndex + 1:], secondNotation)
+    print(f"result1: {result1}")
+
+    # case 2 make ? as #
+    # but we need to make sure that everything else after this is correct
+    
+    result2 = 0
+    if secondIndex == len(secondNotation):
+        result2 = 0 # just reassign it
+    else:
+        nextGroup = secondNotation[secondIndex]
+
+        valid = True
+        for i in range(firstIndex, firstIndex + nextGroup):
+            if i == len(firstNotation) or firstNotation[i] == '.':
+                valid = False
+                break
+        
+        if valid is True:
+            if firstIndex + nextGroup < len(firstNotation) and firstNotation[firstIndex + nextGroup] != "#":
+                result2 = iterate(firstNotation[firstIndex + nextGroup + 1:], secondNotation[secondIndex + 1:])
+    result2 = iterate()
+
+    return result1 + result2
+
+def day12():
+    input = readInputFile("./input/input12test.txt")
+
+    notations = []
+    for line in input:
+        firstNotation, numbers = line.split(" ")
+        secondNotation = [int(x) for x in numbers.split(",")]
+        notations.append({
+            "first": firstNotation,
+            "second": secondNotation
+        })
+    
+    sum = 0
+    for notation in notations:
+        firstNotation = notation["first"]
+        secondNotation = notation["second"]
+
+        sum += iterate(firstNotation, secondNotation)
+    
+    print(sum)
+
+day12()
