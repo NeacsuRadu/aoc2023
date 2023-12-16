@@ -995,12 +995,19 @@ def day11_2():
 
     print(sum)
 
-def iterate(firstNotation, secondNotation):
-    print(f"{firstNotation} - {secondNotation}")
+def myPrint(s, t):
+    prefix = ""
+    for i in range(t):
+        prefix += " "
+    
+    print(f"{prefix}{s}")
+
+def iterate(firstNotation, secondNotation, t):
+    # myPrint(f"{firstNotation} - {secondNotation}", t)
     firstIndex = 0
     secondIndex = 0
     while firstIndex < len(firstNotation) and firstNotation[firstIndex] != "?":
-        print(firstIndex)
+        # print(firstIndex)
         if firstNotation[firstIndex] == ".":
             firstIndex += 1
             continue
@@ -1014,11 +1021,15 @@ def iterate(firstNotation, secondNotation):
             if i == len(firstNotation) or firstNotation[i] == ".":
                 return 0
         
-        if firstIndex + nextGroup == len(firstNotation) or firstNotation[firstIndex + nextGroup] == "#":
-            return 0
-        
-        firstIndex = firstIndex + nextGroup + 1
-        secondIndex += 1
+        if firstIndex + nextGroup == len(firstNotation):
+            firstIndex = len(firstNotation)
+            secondIndex += 1
+        else:
+            if firstNotation[firstIndex + nextGroup] == "#":
+                return 0
+
+            firstIndex = firstIndex + nextGroup + 1
+            secondIndex += 1
     
     if firstIndex == len(firstNotation):
         if secondIndex == len(secondNotation):
@@ -1029,12 +1040,14 @@ def iterate(firstNotation, secondNotation):
     #     if "#" in firstNotation[firstIndex:]:
 
     # case 1 make ? as .
-    result1 = iterate(firstNotation[firstIndex + 1:], secondNotation)
-    print(f"result1: {result1}")
+    # print("making ? as .")
+    result1 = iterate(firstNotation[firstIndex + 1:], secondNotation[secondIndex:], t + 1)
+    # myPrint(f"result1: {result1}", t)
 
     # case 2 make ? as #
     # but we need to make sure that everything else after this is correct
     
+    # print("making ? as #")
     result2 = 0
     if secondIndex == len(secondNotation):
         result2 = 0 # just reassign it
@@ -1049,30 +1062,146 @@ def iterate(firstNotation, secondNotation):
         
         if valid is True:
             if firstIndex + nextGroup < len(firstNotation) and firstNotation[firstIndex + nextGroup] != "#":
-                result2 = iterate(firstNotation[firstIndex + nextGroup + 1:], secondNotation[secondIndex + 1:])
-    result2 = iterate()
+                result2 = iterate(firstNotation[firstIndex + nextGroup + 1:], secondNotation[secondIndex + 1:], t + 1)
+            elif firstIndex + nextGroup == len(firstNotation):
+                result2 = iterate([], secondNotation[secondIndex + 1:], t+1)
+                
+    # myPrint(f"result2 {result2}", t)
 
     return result1 + result2
 
 def day12():
-    input = readInputFile("./input/input12test.txt")
+    input = readInputFile("./input/input12.txt")
 
     notations = []
     for line in input:
         firstNotation, numbers = line.split(" ")
         secondNotation = [int(x) for x in numbers.split(",")]
+
+        firstNotation2 = [c for c in firstNotation]
+        secondNotation2 = [x for x in secondNotation]
+        for i in range(1):
+            firstNotation2.append("?")
+            for c in firstNotation:
+                firstNotation2.append(c)
+            
+            for x in secondNotation:
+                secondNotation2.append(x)
+        
+        firstNotation3 = [c for c in firstNotation]
+        secondNotation3 = [x for x in secondNotation]
+        for i in range(2):
+            firstNotation3.append("?")
+            for c in firstNotation:
+                firstNotation3.append(c)
+            
+            for x in secondNotation:
+                secondNotation3.append(x)
+        
         notations.append({
             "first": firstNotation,
-            "second": secondNotation
+            "second": secondNotation,
+            "first2": firstNotation2,
+            "second2": secondNotation2,
+            "first3": firstNotation3,
+            "second3": secondNotation3,
         })
     
     sum = 0
+    print(len(notations))
+    i = 0
     for notation in notations:
+        i += 1
         firstNotation = notation["first"]
         secondNotation = notation["second"]
 
-        sum += iterate(firstNotation, secondNotation)
+        possibilities = iterate(firstNotation, secondNotation, 0)
+        # print(f'row result {possibilities ** 5}')
+
+        poss2 = iterate(notation["first2"], notation["second2"], 0)
+        y = poss2 // possibilities
+
+        poss3 = iterate(notation["first3"], notation["second3"], 0)
+        print(f"input {firstNotation} and {secondNotation} = {possibilities} - {poss2} ({poss2 / possibilities}) - {poss3} ({poss3 / poss2})")
+
+        sum += possibilities * y ** 4
     
     print(sum)
 
-day12()
+def day13():
+    input = readInputFile("./input/input13test.txt")
+
+    patterns = []
+    lastIndex = 0
+    index = 0
+    for line in input:
+        if line == "":
+            patterns.append(input[lastIndex:index])
+            lastIndex = index + 1
+        index += 1
+    patterns.append(input[lastIndex:])
+
+    sum = 0
+    index = 0
+    for index in range(len(patterns)):
+        pattern = patterns[index]
+        index += 1
+
+        lines = len(pattern)
+        columns = len(pattern[0])
+        
+        maxLines = len(pattern)
+        resultLines = None
+        for i in range(lines - 1):
+            linesUp = i + 1
+            linesDown = maxLines - i - 1
+            l = min(linesUp, linesDown)
+
+            # valid = True
+            invalidCells = 0
+            invalidCellsList = []
+            for j in range(l):
+                for k in range(columns):
+                    if pattern[i - j][k] != pattern[i + j + 1][k]:
+                        invalidCells += 1
+            
+            if invalidCells == 1:
+                if resultLines is not None:
+                    print(f"found pattern with two lines mirror - {index}")
+                else:
+                    resultLines = i + 1
+                    print(invalidCellsList)
+        
+        # resultColumns = None
+        # for i in range(columns - 1):
+        #     columnsLeft = i + 1
+        #     columnsRight = columns - i - 1
+        #     c = min(columnsLeft, columnsRight)
+
+        #     valid = True
+        #     for j in range(c):
+        #         for k in range(lines):
+        #             if pattern[k][i - j] != pattern[k][i + j + 1]:
+        #                 valid = False
+        #                 break
+        #         if valid is False:
+        #             break
+            
+        #     if valid is True:
+        #         if resultLines is not None:
+        #             print(f"found pattern with both line and column - {index}")
+        #         if resultColumns is not None:
+        #             print(f"found pattern with two columns mirror - {index}")
+        #         resultColumns = i + 1
+        
+        # if resultColumns is not None:
+        #     sum += resultColumns
+        print(f"result {resultLines}")
+        if resultLines is not None:
+            sum += 100 * resultLines
+        else:
+            print(f"found pattern with no line - {index}")
+
+    print(sum)
+
+day13()
