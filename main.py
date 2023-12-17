@@ -1387,12 +1387,82 @@ def day15():
                 continue
             
             box.append([label, focal])
-    
-    # boxes = {
-    #     0: [["rn", 1], ["cm", 2]],
-    #     3: [["ot", 7], ["ab", 5], ["pc", 6]]
-    # }
 
     print(computeFocusingPower(boxes))
 
-day15()
+def day16():
+    nextMove = {
+        "/": {
+            "0_1": [[-1, 0]],
+            "0_-1": [[1, 0]],
+            "1_0": [[0, -1]],
+            "-1_0": [[0, 1]]
+        },
+        "\\": {
+            "0_1": [[1, 0]],
+            "0_-1": [[-1, 0]],
+            "1_0": [[0, 1]],
+            "-1_0": [[0, -1]]
+        },
+        "|": {
+            "0_1": [[-1, 0], [1, 0]],
+            "0_-1": [[-1, 0], [1, 0]],
+            "1_0": [[1, 0]],
+            "-1_0": [[-1, 0]]
+        },
+        "-": {
+            "0_1": [[0, 1]],
+            "0_-1": [[0, -1]],
+            "1_0": [[0, -1], [0, 1]],
+            "-1_0": [[0, -1], [0, 1]]
+        },
+        ".": {
+            "0_1": [[0, 1]],
+            "0_-1": [[0, -1]],
+            "1_0": [[1, 0]],
+            "-1_0": [[-1, 0]]
+        }
+    }
+    input = readInputFile("./input/input16.txt")
+
+    energizedCells = {"0_0": 1}
+    q = [[0, 0, 0, 1]]
+    vis = {
+        "0_0_0_1": 1
+    }
+
+    while len(q) > 0:
+        current = q.pop(0)
+        i = current[0]
+        j = current[1]
+        i_dir = current[2]
+        j_dir = current[3]
+
+        nm = nextMove.get(input[i][j])
+        if nm is None:
+            print(f"weird {i} {j} is {input[i][j]}")
+            return 0
+
+        dirKey = f"{i_dir}_{j_dir}"
+        nextDirs = nm.get(dirKey)
+        if nextDirs is None:
+            print(f"very weird {dirKey} and {input[i][j]}")
+            return 0
+
+        for nextDir in nextDirs:
+            next_i = i + nextDir[0]
+            next_j = j + nextDir[1]
+
+            if next_i < 0 or next_i >= len(input) or next_j < 0 or next_j >= len(input[0]):
+                continue
+
+            if vis.get(f"{next_i}_{next_j}_{nextDir[0]}_{nextDir[1]}") is not None:
+                continue
+
+            energizedCells[f"{next_i}_{next_j}"] = 1
+            vis[f"{next_i}_{next_j}_{nextDir[0]}_{nextDir[1]}"] = 1
+            q.append([next_i, next_j, nextDir[0], nextDir[1]])
+
+    print(len(energizedCells.keys()))
+
+day16()
