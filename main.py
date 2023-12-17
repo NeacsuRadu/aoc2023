@@ -1197,12 +1197,18 @@ def day13():
 
     print(sum)
 
-def day14():
-    input = readInputFile("./input/input14.txt")
-
+def computeLoad(m):
     sum = 0
-    cols = {}
-    for j in range(len(input[0])):
+
+    for i in range(len(m)):
+        for j in range(len(m[0])):
+            if m[i][j] == "O":
+                sum += len(m) - i
+
+    return sum
+
+def inclineUp(input):
+    for j in range(len(input)):
         whereWillStop = 0
         for i in range(len(input)):
             if input[i][j] == ".":
@@ -1210,9 +1216,183 @@ def day14():
             elif input[i][j] == "#":
                 whereWillStop = i + 1
             else: # will be O
-                sum += len(input[0]) - whereWillStop
+                input[i][j] = "."
+                input[whereWillStop][j] = "O"
                 whereWillStop += 1
 
-    print(sum)
+def rotateClockWise(m):
+    result = []
 
-day14()
+    for j in range(len(m[0])):
+        result.append([])
+        for i in range(len(m) - 1, -1, -1):
+            result[j].append(m[i][j])
+
+    return result
+
+def printMatrix(m):
+    for i in range(len(m)):
+        for j in range(len(m[i])):
+            print(m[i][j], end="")
+        print("")
+
+def day14():
+    input = readInputFile("./input/input14.txt")
+    m = []
+    index = 0
+    for line in input:
+        m.append([])
+
+        for c in line:
+            m[index].append(c)
+        
+        index += 1
+    # load 87
+    # load 69
+    # load 69
+    # load 69
+    # load 65
+    # load 64
+    # load 65
+    # load 63
+    # load 68
+    # load 69
+    # load 69
+    # load 65
+    # load 64
+    # load 65
+    # load 63
+    # load 68
+    # load 69
+    # load 69
+    # l 7
+    # p 2
+    # 
+    # north, west, south, east
+    # for _ in range(1000000000):
+    for i in range(100000):
+        # printMatrix(m)
+        # print("")
+        inclineUp(m) # north
+        m = rotateClockWise(m)
+        inclineUp(m) # west
+        m = rotateClockWise(m)
+        inclineUp(m) # south
+        m = rotateClockWise(m)
+        inclineUp(m) # east
+        m = rotateClockWise(m)
+
+        load = computeLoad(m)
+        
+        print(load)
+
+    # 92, 155, 218, 281, 344 
+    # ciclu l 63
+    # prefix 91
+        
+    # 
+
+    # for i in range(len(m)):
+    #     for j in range(len(m[i])):
+    #         print(m[i][j], end="")
+    #     print("")
+
+    # print("")
+    # for i in range(len(m)):
+    #     for j in range(len(m[i])):
+    #         print(m[i][j], end="")
+    #     print("")
+
+def hash(s):
+    current_value = 0
+
+    for c in s:
+        asc = ord(c)
+
+        current_value += asc
+        current_value *= 17
+        current_value = current_value % 256
+
+    return current_value
+
+def computeFocusingPower(boxes):
+    focusingPower = 0
+
+    for key in boxes.keys():
+        # print(f"box - {key}")
+        box = boxes.get(key)
+
+        for i in range(len(box)):
+            lens = box[i]
+            # print(f"box - {box}")
+            focusingPower += (key + 1) * (i + 1) * lens[1]
+
+    return focusingPower
+
+def day15():
+    input = readInputFile("./input/input15.txt")
+
+    seq = []
+    for line in input:
+        # print(line)
+
+        steps = line.split(",")
+        for step in steps:
+            seq.append(step)
+    
+    # print(seq)
+    # print(len(seq))
+    boxes = {}
+    for s in seq:
+        if "-" in s:
+            parts = s.split("-")
+            label = parts[0]
+
+            boxIndex = hash(label)
+
+            box = boxes.get(boxIndex)
+            if box is None:
+                continue
+            
+            found = None
+            for i in range(len(box)):
+                lens = box[i]
+                if label == lens[0]:
+                    found = i
+                    break
+            
+            if found is not None:
+                box.pop(found)
+        elif "=" in s:
+            parts = s.split("=")
+            label = parts[0]
+            focal = int(parts[1])
+
+            boxIndex = hash(label)
+
+            box = boxes.get(boxIndex)
+            if box is None:
+                boxes[boxIndex] = [[label, focal]]
+                continue
+            
+            found = None
+            for i in range(len(box)):
+                lens = box[i]
+                if label == lens[0]:
+                    found = i
+                    break
+            
+            if found is not None:
+                box[found][1] = focal
+                continue
+            
+            box.append([label, focal])
+    
+    # boxes = {
+    #     0: [["rn", 1], ["cm", 2]],
+    #     3: [["ot", 7], ["ab", 5], ["pc", 6]]
+    # }
+
+    print(computeFocusingPower(boxes))
+
+day15()
