@@ -1129,7 +1129,7 @@ def day12():
     print(sum)
 
 def day13():
-    input = readInputFile("./input/input13test.txt")
+    input = readInputFile("./input/input13.txt")
 
     patterns = []
     lastIndex = 0
@@ -1159,7 +1159,6 @@ def day13():
 
             # valid = True
             invalidCells = 0
-            invalidCellsList = []
             for j in range(l):
                 for k in range(columns):
                     if pattern[i - j][k] != pattern[i + j + 1][k]:
@@ -1170,38 +1169,50 @@ def day13():
                     print(f"found pattern with two lines mirror - {index}")
                 else:
                     resultLines = i + 1
-                    print(invalidCellsList)
-        
-        # resultColumns = None
-        # for i in range(columns - 1):
-        #     columnsLeft = i + 1
-        #     columnsRight = columns - i - 1
-        #     c = min(columnsLeft, columnsRight)
 
-        #     valid = True
-        #     for j in range(c):
-        #         for k in range(lines):
-        #             if pattern[k][i - j] != pattern[k][i + j + 1]:
-        #                 valid = False
-        #                 break
-        #         if valid is False:
-        #             break
-            
-        #     if valid is True:
-        #         if resultLines is not None:
-        #             print(f"found pattern with both line and column - {index}")
-        #         if resultColumns is not None:
-        #             print(f"found pattern with two columns mirror - {index}")
-        #         resultColumns = i + 1
-        
-        # if resultColumns is not None:
-        #     sum += resultColumns
-        print(f"result {resultLines}")
+        resultColumns = None
+        for i in range(columns - 1):
+            columnsLeft = i + 1
+            columnsRight = columns - i - 1
+            c = min(columnsLeft, columnsRight)
+
+            invalidCells = 0
+            for j in range(c):
+                for k in range(lines):
+                    if pattern[k][i - j] != pattern[k][i + j + 1]:
+                        invalidCells += 1
+
+            if invalidCells == 1:
+                if resultLines is not None:
+                    print(f"found pattern with both line and column - {index}")
+                if resultColumns is not None:
+                    print(f"found pattern with two columns mirror - {index}")
+                else:
+                    resultColumns = i + 1
+
+        if resultColumns is not None:
+            sum += resultColumns
         if resultLines is not None:
             sum += 100 * resultLines
-        else:
-            print(f"found pattern with no line - {index}")
 
     print(sum)
 
-day13()
+def day14():
+    input = readInputFile("./input/input14.txt")
+
+    sum = 0
+    cols = {}
+    for j in range(len(input[0])):
+        whereWillStop = 0
+        for i in range(len(input)):
+            if input[i][j] == ".":
+                continue
+            elif input[i][j] == "#":
+                whereWillStop = i + 1
+            else: # will be O
+                sum += len(input[0]) - whereWillStop
+                whereWillStop += 1
+
+    print(sum)
+
+day14()
