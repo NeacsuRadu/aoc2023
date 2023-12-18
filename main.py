@@ -1425,44 +1425,61 @@ def day16():
     }
     input = readInputFile("./input/input16.txt")
 
-    energizedCells = {"0_0": 1}
-    q = [[0, 0, 0, 1]]
-    vis = {
-        "0_0_0_1": 1
-    }
+    # init = [[0, 0, 0, 1]]
+    init = []
+    for i in range(len(input)):
+        init.append([i, 0, 0, 1])
+        init.append([i, len(input[i]) - 1, 0, -1])
+    
+    for j in range(len(input[0])):
+        init.append([0, j, 1, 0])
+        init.append([len(input) - 1, j, -1, 0])
+    
+    print(len(init))
+    max = 0
 
-    while len(q) > 0:
-        current = q.pop(0)
-        i = current[0]
-        j = current[1]
-        i_dir = current[2]
-        j_dir = current[3]
+    for abc in range(len(init)):
+        starting = init[abc]
+        print(starting)
+        energizedCells = {f"{starting[0]}_{starting[1]}": 1}
+        q = [starting]
+        vis = {f"{starting[0]}_{starting[1]}_{starting[2]}_{starting[3]}": 1}
 
-        nm = nextMove.get(input[i][j])
-        if nm is None:
-            print(f"weird {i} {j} is {input[i][j]}")
-            return 0
+        while len(q) > 0:
+            current = q.pop(0)
+            i = current[0]
+            j = current[1]
+            i_dir = current[2]
+            j_dir = current[3]
 
-        dirKey = f"{i_dir}_{j_dir}"
-        nextDirs = nm.get(dirKey)
-        if nextDirs is None:
-            print(f"very weird {dirKey} and {input[i][j]}")
-            return 0
+            nm = nextMove.get(input[i][j])
+            if nm is None:
+                print(f"weird {i} {j} is {input[i][j]}")
+                return 0
 
-        for nextDir in nextDirs:
-            next_i = i + nextDir[0]
-            next_j = j + nextDir[1]
+            dirKey = f"{i_dir}_{j_dir}"
+            nextDirs = nm.get(dirKey)
+            if nextDirs is None:
+                print(f"very weird {dirKey} and {input[i][j]}")
+                return 0
 
-            if next_i < 0 or next_i >= len(input) or next_j < 0 or next_j >= len(input[0]):
-                continue
+            for nextDir in nextDirs:
+                next_i = i + nextDir[0]
+                next_j = j + nextDir[1]
 
-            if vis.get(f"{next_i}_{next_j}_{nextDir[0]}_{nextDir[1]}") is not None:
-                continue
+                if next_i < 0 or next_i >= len(input) or next_j < 0 or next_j >= len(input[0]):
+                    continue
 
-            energizedCells[f"{next_i}_{next_j}"] = 1
-            vis[f"{next_i}_{next_j}_{nextDir[0]}_{nextDir[1]}"] = 1
-            q.append([next_i, next_j, nextDir[0], nextDir[1]])
+                if vis.get(f"{next_i}_{next_j}_{nextDir[0]}_{nextDir[1]}") is not None:
+                    continue
 
-    print(len(energizedCells.keys()))
+                energizedCells[f"{next_i}_{next_j}"] = 1
+                vis[f"{next_i}_{next_j}_{nextDir[0]}_{nextDir[1]}"] = 1
+                q.append([next_i, next_j, nextDir[0], nextDir[1]])
+        
+        if len(energizedCells.keys()) > max:
+            max = len(energizedCells.keys())
+
+    print(max)
 
 day16()
