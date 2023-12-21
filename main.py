@@ -1002,8 +1002,21 @@ def myPrint(s, t):
     
     print(f"{prefix}{s}")
 
+mem = {}
+def isInMem(firstNotation, secondNotation):
+    key = f"{firstNotation}-{','.join([str(x) for x in secondNotation])}"
+    return mem.get(key)
+
+def setToMem(firstNotation, secondNotation, result):
+    key = f"{firstNotation}-{','.join([str(x) for x in secondNotation])}"
+    mem[key] = result
+
 def iterate(firstNotation, secondNotation, t):
     # myPrint(f"{firstNotation} - {secondNotation}", t)
+    resultFromMem = isInMem(firstNotation, secondNotation)
+    if resultFromMem is not None:
+        return resultFromMem
+
     firstIndex = 0
     secondIndex = 0
     while firstIndex < len(firstNotation) and firstNotation[firstIndex] != "?":
@@ -1013,12 +1026,14 @@ def iterate(firstNotation, secondNotation, t):
             continue
 
         if secondIndex == len(secondNotation):
+            setToMem(firstNotation, secondNotation, 0)
             return 0
         
         nextGroup = secondNotation[secondIndex]
 
         for i in range(firstIndex, firstIndex + nextGroup):
             if i == len(firstNotation) or firstNotation[i] == ".":
+                setToMem(firstNotation, secondNotation, 0)
                 return 0
         
         if firstIndex + nextGroup == len(firstNotation):
@@ -1026,6 +1041,7 @@ def iterate(firstNotation, secondNotation, t):
             secondIndex += 1
         else:
             if firstNotation[firstIndex + nextGroup] == "#":
+                setToMem(firstNotation, secondNotation, 0)
                 return 0
 
             firstIndex = firstIndex + nextGroup + 1
@@ -1033,7 +1049,9 @@ def iterate(firstNotation, secondNotation, t):
     
     if firstIndex == len(firstNotation):
         if secondIndex == len(secondNotation):
+            setToMem(firstNotation, secondNotation, 1)
             return 1
+        setToMem(firstNotation, secondNotation, 0)
         return 0
 
     # if secondIndex == len(secondNotation):
@@ -1068,63 +1086,43 @@ def iterate(firstNotation, secondNotation, t):
                 
     # myPrint(f"result2 {result2}", t)
 
+    setToMem(firstNotation, secondNotation, result1 + result2)
     return result1 + result2
 
 def day12():
     input = readInputFile("./input/input12.txt")
 
     notations = []
+    concat = 5
     for line in input:
         firstNotation, numbers = line.split(" ")
         secondNotation = [int(x) for x in numbers.split(",")]
 
         firstNotation2 = [c for c in firstNotation]
         secondNotation2 = [x for x in secondNotation]
-        for i in range(1):
+        for i in range(concat-1):
             firstNotation2.append("?")
             for c in firstNotation:
                 firstNotation2.append(c)
             
             for x in secondNotation:
                 secondNotation2.append(x)
-        
-        firstNotation3 = [c for c in firstNotation]
-        secondNotation3 = [x for x in secondNotation]
-        for i in range(2):
-            firstNotation3.append("?")
-            for c in firstNotation:
-                firstNotation3.append(c)
-            
-            for x in secondNotation:
-                secondNotation3.append(x)
-        
+
         notations.append({
-            "first": firstNotation,
-            "second": secondNotation,
-            "first2": firstNotation2,
-            "second2": secondNotation2,
-            "first3": firstNotation3,
-            "second3": secondNotation3,
+            "first": firstNotation2,
+            "second": secondNotation2
         })
     
     sum = 0
     print(len(notations))
-    i = 0
     for notation in notations:
-        i += 1
         firstNotation = notation["first"]
         secondNotation = notation["second"]
 
+        mem = {}
         possibilities = iterate(firstNotation, secondNotation, 0)
-        # print(f'row result {possibilities ** 5}')
 
-        poss2 = iterate(notation["first2"], notation["second2"], 0)
-        y = poss2 // possibilities
-
-        poss3 = iterate(notation["first3"], notation["second3"], 0)
-        print(f"input {firstNotation} and {secondNotation} = {possibilities} - {poss2} ({poss2 / possibilities}) - {poss3} ({poss3 / poss2})")
-
-        sum += possibilities * y ** 4
+        sum += possibilities
     
     print(sum)
 
@@ -1482,4 +1480,4 @@ def day16():
 
     print(max)
 
-day16()
+day12()
