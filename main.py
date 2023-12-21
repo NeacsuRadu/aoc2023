@@ -1480,4 +1480,74 @@ def day16():
 
     print(max)
 
-day12()
+import heapq
+
+def day17():
+    nextDir = {
+        "0_1": [[0, 1], [1, 0], [-1, 0]],
+        "0_-1": [[0, -1], [1, 0], [-1, 0]],
+        "1_0": [[1, 0], [0, 1], [0, -1]],
+        "-1_0": [[-1, 0], [0, 1], [0, -1]]
+    }
+    nextDirChar = {
+        "0_1": ">",
+        "0_-1": "<",
+        "1_0": "v",
+        "-1_0": "^"
+    }
+    input = readInputFile("./input/input17.txt")
+
+    grid = [[int(x) for x in line] for line in input]
+    debug = [["." for x in line] for line in input]
+
+    q = []
+    heapq.heappush(q, (0, 0, 0, 0, 1, 0))
+    vis = {
+        "0_0_0_1_0": 0
+    }
+
+    maxLines = len(grid)
+    maxColumns = len(grid[0])
+
+    minSteps = 4
+    maxSteps = 10
+
+    while len(q) > 0:
+        weight, i, j, dirI, dirJ, stepsInSameDirection = heapq.heappop(q)
+#         print(weight, i, j, dirI, dirJ, stepsInSameDirection)
+        weightInVis = vis.get(f"{i}_{j}_{dirI}_{dirJ}_{stepsInSameDirection}")
+#         if weightInVis is not None and weight > weightInVis:
+#             continue
+
+#         debug[i][j] = nextDirChar.get(f"{dirI}_{dirJ}")
+        nextDirKey = f"{dirI}_{dirJ}"
+        next = nextDir.get(nextDirKey)
+        if next is None:
+            print("next is none")
+            return 0
+
+        for index in range(3):
+            nextDirI, nextDirJ = next[index]
+            if index == 0 and stepsInSameDirection == maxSteps:
+                continue
+
+            if index != 0 and stepsInSameDirection < minSteps and stepsInSameDirection != 0:
+                continue
+
+            nextI = i + nextDirI
+            nextJ = j + nextDirJ
+
+            if nextI < 0 or nextI >= maxLines or nextJ < 0 or nextJ >= maxColumns:
+                continue
+
+            nextWeight = weight + grid[nextI][nextJ]
+            nextSteps = stepsInSameDirection + 1 if index == 0 else 1
+            nextWeightInVis = vis.get(f"{nextI}_{nextJ}_{nextDirI}_{nextDirJ}_{nextSteps}")
+            if nextWeightInVis is None or nextWeightInVis > nextWeight:
+                vis[f"{nextI}_{nextJ}_{nextDirI}_{nextDirJ}_{nextSteps}"] = nextWeight
+                heapq.heappush(q, (nextWeight, nextI, nextJ, nextDirI, nextDirJ, nextSteps))
+
+                if nextI == maxLines - 1 and nextJ == maxColumns - 1 and nextSteps >= minSteps:
+                    print(nextWeight)
+
+day17()
