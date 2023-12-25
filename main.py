@@ -1593,24 +1593,30 @@ def day18():
         "3": "U"
     }
 
-    input = readInputFile("./input/input18test.txt")
+    input = readInputFile("./input/inpur18.txt")
 
 #     steps = [(dirMap.get(line.split(" ")[2][-2]), hexToNumber(line.split(" ")[2][2:-2])) for line in input]
     steps = [(line.split(" ")[0], int(line.split(" ")[1])) for line in input]
+    print(f"steps {len(steps)}")
 
     mini = 0
     maxi = 0
+
+    minj = 0
+    maxj = 0
 
     intervalsByLines = {}
 
     i = 0
     j = 0
+    volume = 0
     for step in steps:
         dirI, dirJ = dir.get(step[0])
         times = step[1]
 
         newI = i + dirI * times
         newJ = j + dirJ * times
+        volume += times
 
         if step[0] in "LR":
             intervalsForLine = intervalsByLines.get(i)
@@ -1625,133 +1631,128 @@ def day18():
         mini = min(mini, i)
         maxi = max(maxi, i)
 
-    volume = 0
+        minj = min(minj, j)
+        maxj = max(maxj, j)
+
+    print(mini, maxi)
+    print(minj, maxj)
 
     for key in intervalsByLines.keys():
         intervalsByLines.get(key).sort(key=day18sortFunction)
 
     intervals = intervalsByLines.get(mini)
-    for j1, j2 in intervals:
-        volume += j2 - j1 + 1
+    print(f"initial volume {volume}")
 
     for line in range(mini + 1, maxi):
-        intervalsForLine = intervalsByLines.get(line)
-        if intervalsForLine is not None:
+        print("---------------------------")
+        print(f"volume {volume}")
+        print(f"line {line}")
+        print(f"intervals {intervals}")
+        lineIntervals = intervalsByLines.get(line)
+        if lineIntervals is not None:
+            print(f"line intervals {lineIntervals}")
             newIntervals = []
 
-            indexIntervals = 0
-            indexIntervalsForLine = 0
+            index = 0
+            indexLine = 0
 
             # don't need so many ifs, you can just pick the left side based on if and then scan the rest similarly
-            while indexIntervals < len(intervals) and indexIntervalsForLine < len(intervalsForLine):
-                if intervalsForLine[indexIntervalsForLine][0] < intervals[indexIntervals][0]:
-                    if intervalsForLine[indexIntervalsForLine][1] != intervals[indexIntervals][0]:
-                        print("not good")
+            while index < len(intervals) and indexLine < len(lineIntervals):
+                left = None
+                right = None
 
-                    left = intervalsForLine[indexIntervalsForLine][0]
-                    right = None
+                if lineIntervals[indexLine][0] < intervals[index][0]:
+                    left = lineIntervals[indexLine][0]
+                    if lineIntervals[indexLine][1] == intervals[index][0]:
+                        volume -= lineIntervals[indexLine][1] - lineIntervals[indexLine][0]
+                        if indexLine == len(lineIntervals) - 1:
+                            right = intervals[index][0]
+                            index += 1
+                        indexLine += 1
+                    else:
+                        if lineIntervals[indexLine][1] > intervals[index][0]:
+                            print("not good 1")
 
-                    indexIntervalsForLine += 1
-
-                    while indexIntervals < len(intervals) and indexIntervalsForLine < len(intervalsForLine) and intervals[indexIntervals][1] == intervalsForLine[indexIntervalsForLine][0]:
-                        indexIntervals += 1
-                        indexIntervalsForLine += 1
-
-                    if indexIntervals == len(intervals) and indexIntervalsForLine == len(intervalsForLine):
-                        right = intervalsForLine[indexIntervalsForLine - 1][1]
-                    elif indexIntervalsForLine == len(intervalsForLine):
-                        right = intervals[indexIntervals - 1][1]
-                    elif indexIntervals == len(intervals):
-                        print("not good 2")
-                    elif intervals[indexIntervals][1] == intervalsForLine[indexIntervalsForLine][1]:
-                        right = intervalsForLine[indexIntervalsForLine][0]
-                        if intervalsForLine[indexIntervalsForLine] <= intervals[indexIntervals]:
-                            print("not good 3")
-                    elif intervals[indexIntervals][1] < intervalsForLine[indexIntervalsForLine][0]:
-                        right = intervals[indexIntervals][1]
-                    elif intervals[indexIntervals][1] > intervalsForLine[indexIntervalsForLine]:
-                        if intervals[indexIntervals] < intervalsForLine[indexIntervalsForLine]:
-                            print("not good 4")
-                        else:
-                            right = intervalsForLine[indexIntervalsForLine][0]
-                            intervals[indexIntervals][0] = intervalsForLine[indexIntervalsForLine][1]
-                            indexIntervalsForLine += 1
-
-                    newIntervals.append([left, right])
-                elif intervalsForLine[indexIntervalsForLine][0] == intervals[indexIntervals][0]:
-                    if intervalsForLine[indexIntervalsForLine][1] >= intervals[indexIntervals][1]:
-                        print("not good 2")
-
-                    left = intervalsForLine[indexIntervalsForLine][1]
-                    right = None
-
-                    indexIntervalsForLine += 1
-
-                    while indexIntervals < len(intervals) and indexIntervalsForLine < len(intervalsForLine) and intervals[indexIntervals][1] == intervalsForLine[indexIntervalsForLine][0]:
-                        indexIntervals += 1
-                        indexIntervalsForLine += 1
-
-                    if indexIntervals == len(intervals) and indexIntervalsForLine == len(intervalsForLine):
-                        right = intervalsForLine[indexIntervalsForLine - 1][1]
-                    elif indexIntervalsForLine == len(intervalsForLine):
-                        right = intervals[indexIntervals - 1][1]
-                    elif indexIntervals == len(intervals):
-                        print("not good 2")
-                    elif intervals[indexIntervals][1] == intervalsForLine[indexIntervalsForLine][1]:
-                        right = intervalsForLine[indexIntervalsForLine][0]
-                        if intervalsForLine[indexIntervalsForLine] <= intervals[indexIntervals]:
-                            print("not good 3")
-                    elif intervals[indexIntervals][1] < intervalsForLine[indexIntervalsForLine][0]:
-                        right = intervals[indexIntervals][1]
-                    elif intervals[indexIntervals][1] > intervalsForLine[indexIntervalsForLine]:
-                        if intervals[indexIntervals] < intervalsForLine[indexIntervalsForLine]:
-                            print("not good 4")
-                        else:
-                            right = intervalsForLine[indexIntervalsForLine][0]
-                            intervals[indexIntervals][0] = intervalsForLine[indexIntervalsForLine][1]
-                            indexIntervalsForLine += 1
-
-                    newIntervals.append([left, right])
-                elif intervalsForLine[indexIntervalsForLine][0] > intervals[indexIntervals][0]:
-                    if intervalsForLine[indexIntervalsForLine][0] > intervals[indexIntervals][1]:
-                        print("not good 11")
-                    elif intervalsForLine[indexIntervalsForLine][1] == intervals[indexIntervals][1]:
-                        left = intervals[indexIntervals][0]
-                        right = intervalsForLine[indexIntervalsForLine][0]
-
+                        volume -= lineIntervals[indexLine][1] - lineIntervals[indexLine][0] - 1
+                        right = lineIntervals[indexLine][1]
+                        indexLine += 1
                         newIntervals.append([left, right])
-                        indexIntervals += 1
-                        indexIntervalsForLine += 1
-                    elif intervalsForLine[indexIntervalsForLine][1] < intervals[indexIntervals][1]:
-                        left = intervals[indexIntervals][0]
-                        right = intervalsForLine[indexIntervalsForLine][0]
+                        continue
+                elif lineIntervals[indexLine][0] == intervals[index][0]:
+                    if lineIntervals[indexLine][1] >= intervals[index][1]:
+                        print("not good 2")
 
-                        newIntervals.append([left, right])
-
-                        intervals[indexIntervals][0] = intervalsForLine[indexIntervalsForLine][1]
-                        indexIntervalsForLine += 1
+                    left = lineIntervals[indexLine][1]
+                    if indexLine == len(lineIntervals) - 1:
+                        right = intervals[indexLine][1]
+                        index += 1
+                    indexLine += 1
+                elif lineIntervals[indexLine][0] > intervals[index][0]:
+                    left = intervals[index][0]
                 else:
-                    print("not good 10")
+                    print("not good 4")
 
+                while indexLine < len(lineIntervals) and index < len(intervals):
+                    if intervals[index][1] != lineIntervals[indexLine][0]:
+                        if intervals[index][1] < lineIntervals[indexLine][0]:
+                            right = intervals[index][1]
+                            index += 1
+                            break
 
-            while indexIntervals < len(intervals):
-                newIntervals.append(intervals[indexIntervals])
-                indexIntervals += 1
-            while indexIntervalsForLine < len(intervalsForLine):
-                newIntervals.append(intervalsForLine[indexIntervalsForLine])
-                indexIntervalsForLine += 1
+                        # it is >
+                        if intervals[index][1] < lineIntervals[indexLine][1]:
+                            print("not good 6")
+
+                        if intervals[index][1] == lineIntervals[indexLine][1]:
+                            right = lineIntervals[indexLine][0]
+                            index += 1
+                            indexLine += 1
+                            break
+
+                        # it is like i1 i2 j2 j1
+                        right = lineIntervals[indexLine][0]
+                        intervals[index][0] = lineIntervals[indexLine][1]
+                        indexLine += 1
+
+                    volume -= lineIntervals[indexLine][1] - lineIntervals[indexLine][0]
+                    index += 1
+                    if index == len(intervals):
+                        right = lineIntervals[indexLine][1]
+                        indexLine += 1
+                        break
+
+                    if intervals[index][0] != lineIntervals[indexLine][1]:
+                        if intervals[index][0] < lineIntervals[indexLine][1]:
+                            print("not good 7")
+
+                        right = lineIntervals[indexLine][1]
+                        indexLine += 1
+                        break
+
+                    indexLine += 1
+                    if indexLine == len(lineIntervals):
+                        right = intervals[index][1]
+                        index += 1
+                        break
+
+                newIntervals.append([left, right])
+
+            while index < len(intervals):
+                newIntervals.append(intervals[index])
+                index += 1
+            while indexLine < len(lineIntervals):
+                newIntervals.append(lineIntervals[indexLine])
+                volume -= lineIntervals[indexLine][1] - lineIntervals[indexLine][0] - 1
+                indexLine += 1
 
             intervals = newIntervals
-
+        else:
+            print("no line intervals")
 
         for j1, j2 in intervals:
-            volume += j2 - j1 + 1
-
-    for j1, j2 in intervals:
-        volume += j2 - j1 + 1
+            volume += j2 - j1 - 1
 
     print(volume)
-
 
 def day18part1():
     dir = {
@@ -1817,4 +1818,210 @@ def day18part1():
 
     print(volume)
 
-day18part1()
+def day18part2():
+    dir = {
+        "U": [-1, 0],
+        "D": [1, 0],
+        "R": [0, 1],
+        "L": [0, -1]
+    }
+
+    dirMap = {
+        "0": "R",
+        "1": "D",
+        "2": "L",
+        "3": "U"
+    }
+
+    input = readInputFile("./input/inpur18.txt")
+
+    steps = [(dirMap.get(line.split(" ")[2][-2]), hexToNumber(line.split(" ")[2][2:-2])) for line in input]
+#     steps = [(line.split(" ")[0], int(line.split(" ")[1])) for line in input]
+    print(f"steps {len(steps)}")
+
+    mini = 0
+    maxi = 0
+
+    minj = 0
+    maxj = 0
+
+    intervalsByLines = {}
+
+
+#     debug = {}
+    i = 0
+    j = 0
+    for step in steps:
+        dirI, dirJ = dir.get(step[0])
+        times = step[1]
+
+        newI = i + dirI * times
+        newJ = j + dirJ * times
+
+#         auxi = i
+#         auxj = j
+#         for _ in range(times):
+#             auxi += dirI
+#             auxj += dirJ
+#             debug[f"{auxi}_{auxj}"] = "#"
+
+        if step[0] in "LR":
+            intervalsForLine = intervalsByLines.get(i)
+            if intervalsForLine is None:
+                intervalsByLines[i] = [[min(j, newJ), max(j, newJ)]]
+            else:
+                intervalsForLine.append([min(j, newJ), max(j, newJ)])
+
+        i = newI
+        j = newJ
+
+        mini = min(mini, i)
+        maxi = max(maxi, i)
+
+        minj = min(minj, j)
+        maxj = max(maxj, j)
+
+    print(mini, maxi)
+    print(minj, maxj)
+
+    #     -209 184
+    #     -132 216
+#     for x in range(-209, 185):
+#         for y in range(-132, 217):
+#             if debug.get(f"{x}_{y}") is None:
+#                 print(".", end="")
+#             else:
+#                 print("#", end="")
+#         print("")
+
+    volume = 0
+    print(volume)
+    print(f"lines with intervals {len(intervalsByLines.keys())}")
+    for key in intervalsByLines.keys():
+        intervalsByLines.get(key).sort(key=day18sortFunction)
+
+    intervals = intervalsByLines.get(mini)
+    for j1, j2 in intervals:
+        volume += j2 - j1 + 1
+
+    print(f"initial volume {volume}")
+
+    for line in range(mini + 1, maxi):
+#         print("---------------------------")
+#         print(f"volume {volume}")
+#         print(f"line {line}")
+#         print(f"intervals {intervals}")
+        lineIntervals = intervalsByLines.get(line)
+        if lineIntervals is not None:
+#             print(f"line intervals {lineIntervals}")
+            newIntervals = []
+
+            index = 0
+            indexLine = 0
+
+            # don't need so many ifs, you can just pick the left side based on if and then scan the rest similarly
+            while index < len(intervals) and indexLine < len(lineIntervals):
+                left = None
+                right = None
+                whereToLook = None
+
+                if intervals[index][0] < lineIntervals[indexLine][0]:
+                    whereToLook = 2
+                    left = intervals[index][0]
+                elif intervals[index][0] == lineIntervals[indexLine][0]:
+                    if lineIntervals[indexLine][1] == intervals[index][1]:
+                        volume += lineIntervals[indexLine][1] - lineIntervals[indexLine][0] + 1
+                        indexLine += 1
+                        index += 1
+                        continue
+                    elif lineIntervals[indexLine][1] > intervals[index][1]:
+                        print("not good 1")
+
+                    whereToLook = 2
+                    volume += lineIntervals[indexLine][1] - lineIntervals[indexLine][0]
+                    left = lineIntervals[indexLine][1]
+                    indexLine += 1
+                elif intervals[index][0] > lineIntervals[indexLine][0]:
+                    whereToLook = 1
+                    left = lineIntervals[indexLine][0]
+                else:
+                    print("not good 2")
+                    return 0
+
+                while indexLine < len(lineIntervals) and index < len(intervals):
+                    if whereToLook == 1: # check intervals
+                        if lineIntervals[indexLine][1] < intervals[index][0]:
+                            right = lineIntervals[indexLine][1]
+                            indexLine += 1
+                            break
+
+                        if lineIntervals[indexLine][1] == intervals[index][0]:
+                            whereToLook = 2
+                            indexLine += 1
+                            continue
+
+                        # lineIntervals[indexLine][1] > intervals[index][0] - should not happen
+                        print("not good 3")
+                        return 0
+                    else: # whereToLook == 2
+                        if intervals[index][1] < lineIntervals[indexLine][0]:
+                            right = intervals[index][1]
+                            index += 1
+                            break
+
+                        if intervals[index][1] == lineIntervals[indexLine][0]:
+                            whereToLook = 1
+                            index += 1
+                            continue
+
+                        # intervals[index][1] > lineIntervals[indexLine][0]
+                        if lineIntervals[indexLine][1] < intervals[index][1]:
+                            right = lineIntervals[indexLine][0]
+                            intervals[index][0] = lineIntervals[indexLine][1]
+                            volume += lineIntervals[indexLine][1] - lineIntervals[indexLine][0] - 1
+                            indexLine += 1
+                            break
+
+                        if lineIntervals[indexLine][1] == intervals[index][1]:
+                            right = lineIntervals[indexLine][0]
+                            volume += lineIntervals[indexLine][1] - lineIntervals[indexLine][0]
+                            index += 1
+                            indexLine += 1
+                            break
+
+                        # it should not reach this one
+                        print("not good 4")
+                        return 0
+
+                if indexLine == len(lineIntervals):
+                    if whereToLook == 2 and right is None:
+                        right = intervals[index][1]
+                        index += 1
+                elif index == len(intervals):
+                    if whereToLook == 1 and right is None:
+                        right = lineIntervals[indexLine][1]
+                        indexLine += 1
+
+                newIntervals.append([left, right])
+
+            while index < len(intervals):
+                newIntervals.append(intervals[index])
+                index += 1
+            while indexLine < len(lineIntervals):
+                newIntervals.append(lineIntervals[indexLine])
+                indexLine += 1
+
+            intervals = newIntervals
+#         else:
+#             print("no line intervals")
+
+        for j1, j2 in intervals:
+            volume += j2 - j1 + 1
+
+
+    for j1, j2 in intervalsByLines.get(maxi):
+        volume += j2 - j1 + 1
+
+    print(volume)
+
+day18part2()
