@@ -2024,4 +2024,186 @@ def day18part2():
 
     print(volume)
 
-day18part2()
+def day19():
+    input = readInputFile("./input/input19.txt")
+
+    splitIndex = input.index("")
+    workflows = {}
+    for workflow in input[:splitIndex]:
+        name, rest = workflow.split("{")
+
+        checks = []
+        checksRaw = rest[:-1].split(",")
+        for check in checksRaw[:-1]:
+            conditionRaw, newWorkflow = check.split(":")
+
+            category = None
+            comparison = None
+            number = None
+            if "<" in conditionRaw:
+                category = conditionRaw.split("<")[0]
+                comparison = "<"
+                number = int(conditionRaw.split("<")[1])
+            elif ">" in conditionRaw:
+                category = conditionRaw.split(">")[0]
+                comparison = ">"
+                number = int(conditionRaw.split(">")[1])
+            else:
+                print(f"not good {conditionRaw}")
+
+            checks.append({
+                "category": category,
+                "comparison": comparison,
+                "number": number,
+                "workflow": newWorkflow
+            })
+
+        checks.append({
+            "workflow": checksRaw[-1]
+        })
+
+        workflows[name] = checks
+
+
+    parts = []
+    for p in input[splitIndex + 1:]:
+        categories = {}
+        for c in p[1:-1].split(","):
+            category = c.split("=")[0]
+            rating = int(c.split("=")[1])
+            categories[category] = rating
+        parts.append(categories)
+
+#     sum = 0
+#     for part in parts:
+#         workflow = "in"
+#
+#         while workflow not in "AR":
+#             checks = workflows.get(workflow)
+#
+#             for check in checks:
+#                 newWorkflow = check.get("workflow")
+#
+#                 category = check.get("category")
+#                 comparison = check.get("comparison")
+#                 number = check.get("number")
+#                 if comparison is None:
+#                     workflow = newWorkflow
+#                     break
+#                 elif comparison == "<":
+#                     if part.get(category) < number:
+#                         workflow = newWorkflow
+#                         break
+#                 elif comparison == ">":
+#                     if part.get(category) > number:
+#                         workflow = newWorkflow
+#                         break
+#                 else:
+#                     print("not good at all")
+#
+#         if workflow == "A":
+#             sum += part.get("x") + part.get("m") + part.get("a") + part.get("s")
+#     print(sum)
+    q = [
+        {
+            "workflow": "in",
+            "x": [1, 4000],
+            "m": [1, 4000],
+            "a": [1, 4000],
+            "s": [1, 4000]
+        }
+    ]
+    acceptedParts = []
+    while len(q) > 0:
+        part = q.pop(0)
+        workflow = part.get("workflow")
+        x = part.get("x")
+        m = part.get("m")
+        a = part.get("a")
+        a = part.get("s")
+
+        if workflow == "A":
+            acceptedParts.append({
+                "x": x,
+                "m": m,
+                "a": a,
+                "s": s
+            })
+            continue
+        if workflow == "R":
+            continue
+
+        checks = workflows.get(workflow)
+        for check in checks:
+            newWorkflow = check.get("workflow")
+
+            category = check.get("category")
+            comparison = check.get("comparison")
+            number = check.get("number")
+
+            if comparison is None:
+                q.append({
+                    "workflow": newWorkflow,
+                    "x": x,
+                    "m": m,
+                    "a": a,
+                    "s": s
+                })
+            elif comparison = "<":
+                if number > comparison.get(category)[1]:
+                    q.append({
+                        "workflow": newWorkflow,
+                        "x": x,
+                        "m": m,
+                        "a": a,
+                        "s": s
+                    })
+                    break
+                elif number <= comparison.get(category)[0]:
+                    continue
+                else:
+                    newPart = {
+                        "workflow": newWorkflow,
+                        "x": [x[0], x[1]],
+                        "m": [m[0], m[1]],
+                        "a": [a[0], a[1]],
+                        "s": [s[0], s[1]]
+                    }
+                    newPart[category][1] = number - 1
+                    part[category][0] = number
+                    q.append(newPart)
+            elif comparison = ">":
+                if number < comparison.get(category)[0]:
+                    q.append({
+                        "workflow": newWorkflow,
+                        "x": x,
+                        "m": m,
+                        "a": a,
+                        "s": s
+                    })
+                    break
+                elif number >= comparison.get(category)[1]:
+                    continue
+                else:
+                    newPart = {
+                        "workflow": newWorkflow,
+                        "x": [x[0], x[1]],
+                        "m": [m[0], m[1]],
+                        "a": [a[0], a[1]],
+                        "s": [s[0], s[1]]
+                    }
+                    newPart[category][0] = number + 1
+                    part[category][1] = number
+                    q.append(newPart)
+            else:
+                print("not good")
+
+    product = 1
+    for part in acceptedParts:
+        product *= part.get("x")[1] - part.get("x")[0] + 1
+        product *= part.get("m")[1] - part.get("m")[0] + 1
+        product *= part.get("a")[1] - part.get("a")[0] + 1
+        product *= part.get("s")[1] - part.get("s")[0] + 1
+    print(product)
+
+day19()
