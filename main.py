@@ -2120,7 +2120,8 @@ def day19():
         x = part.get("x")
         m = part.get("m")
         a = part.get("a")
-        a = part.get("s")
+        s = part.get("s")
+#         print(workflow, x, m, a, s)
 
         if workflow == "A":
             acceptedParts.append({
@@ -2149,8 +2150,8 @@ def day19():
                     "a": a,
                     "s": s
                 })
-            elif comparison = "<":
-                if number > comparison.get(category)[1]:
+            elif comparison == "<":
+                if number > part.get(category)[1]:
                     q.append({
                         "workflow": newWorkflow,
                         "x": x,
@@ -2159,7 +2160,7 @@ def day19():
                         "s": s
                     })
                     break
-                elif number <= comparison.get(category)[0]:
+                elif number <= part.get(category)[0]:
                     continue
                 else:
                     newPart = {
@@ -2172,8 +2173,8 @@ def day19():
                     newPart[category][1] = number - 1
                     part[category][0] = number
                     q.append(newPart)
-            elif comparison = ">":
-                if number < comparison.get(category)[0]:
+            elif comparison == ">":
+                if number < part.get(category)[0]:
                     q.append({
                         "workflow": newWorkflow,
                         "x": x,
@@ -2182,7 +2183,7 @@ def day19():
                         "s": s
                     })
                     break
-                elif number >= comparison.get(category)[1]:
+                elif number >= part.get(category)[1]:
                     continue
                 else:
                     newPart = {
@@ -2198,12 +2199,192 @@ def day19():
             else:
                 print("not good")
 
-    product = 1
-    for part in acceptedParts:
-        product *= part.get("x")[1] - part.get("x")[0] + 1
-        product *= part.get("m")[1] - part.get("m")[0] + 1
-        product *= part.get("a")[1] - part.get("a")[0] + 1
-        product *= part.get("s")[1] - part.get("s")[0] + 1
-    print(product)
+#     product = 1
+#     for part in acceptedParts:
+#         product *= part.get("x")[1] - part.get("x")[0] + 1
+#         product *= part.get("m")[1] - part.get("m")[0] + 1
+#         product *= part.get("a")[1] - part.get("a")[0] + 1
+#         product *= part.get("s")[1] - part.get("s")[0] + 1
+#     print(product)
+#     print(len(acceptedParts))
+    result = 0
+#     for a in acceptedParts:
+#         print(a)
+#     for index in range(len(acceptedParts)):
+#         part = acceptedParts[index]
+#         cs = {
+#             "x": [part.get("x")[0], part.get("x")[1]],
+#             "m": [part.get("m")[0], part.get("m")[1]],
+#             "a": [part.get("a")[0], part.get("a")[1]],
+#             "s": [part.get("s")[0], part.get("s")[1]],
+#         }
+#
+#         newInterval = False
+#         for j in range(index):
+#             print("da")
+#
+#         if newInterval is True:
+#             result += (cs.get("x")[1] - cs.get("x")[0] + 1) * (cs.get("m")[1] - cs.get("m")[0] + 1) * (cs.get("a")[1] - cs.get("a")[0] + 1) * (cs.get("s")[1] - cs.get("s")[0] + 1)
+#         else:
+#             result += (cs.get("x")[1] - cs.get("x")[0] + 1) * (part.get("m")[1] - part.get("m")[0] + 1) * (part.get("a")[1] - part.get("a")[0] + 1) * (part.get("s")[1] - part.get("s")[0] + 1)
+#             result += (part.get("x")[1] - part.get("x")[0] + 1) * (cs.get("m")[1] - cs.get("m")[0] + 1) * (part.get("a")[1] - part.get("a")[0] + 1) * (part.get("s")[1] - part.get("s")[0] + 1)
+#             result += (part.get("x")[1] - part.get("x")[0] + 1) * (part.get("m")[1] - part.get("m")[0] + 1) * (cs.get("a")[1] - cs.get("a")[0] + 1) * (part.get("s")[1] - part.get("s")[0] + 1)
+#             result += (part.get("x")[1] - part.get("x")[0] + 1) * (part.get("m")[1] - part.get("m")[0] + 1) * (part.get("a")[1] - part.get("a")[0] + 1) * (cs.get("s")[1] - cs.get("s")[0] + 1)
+    for cs in acceptedParts:
+        result += (cs.get("x")[1] - cs.get("x")[0] + 1) * (cs.get("m")[1] - cs.get("m")[0] + 1) * (cs.get("a")[1] - cs.get("a")[0] + 1) * (cs.get("s")[1] - cs.get("s")[0] + 1)
+    print(result)
 
-day19()
+class broadcaster:
+    def __init__(self, name, modules):
+        self.name = name
+        self.modules = modules
+        self.inputs = {}
+
+    def action(self, q, pulse, fromModule):
+        for m in self.modules:
+            q.append({"name": m, "pulse": pulse, "from": self.name})
+
+    def addInput(self, input):
+        self.inputs[input] = 0
+
+    def getName(self):
+        return "broad"
+
+    def getModules(self):
+        return self.modules
+
+    def getInputs(self):
+        return self.inputs.keys()
+
+class flipflop:
+    def __init__(self, name, modules):
+        self.state = 0
+        self.name = name
+        self.modules = modules
+        self.inputs = {}
+
+    def action(self, q, pulse, fromModule):
+        if pulse == 1:
+            return
+
+        if self.state == 0:
+            self.state = 1
+        else:
+            self.state = 0
+
+        for m in self.modules:
+            q.append({"name": m, "pulse": self.state, "from": self.name})
+
+    def addInput(self, input):
+        self.inputs[input] = 0
+
+    def getName(self):
+        return "flip"
+
+    def getModules(self):
+        return self.modules
+
+    def getInputs(self):
+        return self.inputs.keys()
+
+class conjunction:
+    def __init__(self, name, modules):
+        self.name = name
+        self.modules = modules
+        self.inputs = {}
+
+    def action(self, q, pulse, fromModule):
+        self.inputs[fromModule] = pulse
+
+        nextPulse = self.getNextPulse()
+        for m in self.modules:
+            q.append({"name": m, "pulse": nextPulse, "from": self.name})
+
+    def getNextPulse(self):
+        for key in self.inputs:
+            if self.inputs.get(key) == 0:
+                return 1
+        return 0
+
+    def addInput(self, input):
+        self.inputs[input] = 0
+
+    def getName(self):
+        return "conj"
+
+    def getModules(self):
+        return self.modules
+
+    def getInputs(self):
+        return self.inputs.keys()
+
+def day20():
+    input = readInputFile("./input/input20.txt")
+
+    modules = {}
+    for line in input:
+        nameAndType, moduleNames = line.split(" -> ")
+
+        if nameAndType[0] == "%":
+            modules[nameAndType[1:]] = flipflop(nameAndType[1:], moduleNames.split(", "))
+        elif nameAndType[0] == "&":
+            modules[nameAndType[1:]] = conjunction(nameAndType[1:], moduleNames.split(", "))
+        else:
+            modules[nameAndType] = broadcaster(nameAndType, moduleNames.split(", "))
+
+    for line in input:
+        nameAndType, moduleNames = line.split(" -> ")
+
+        name = None
+        if nameAndType[0] in "%&":
+            name = nameAndType[1:]
+        else:
+            name = nameAndType
+
+        for m in moduleNames.split(", "):
+            mod = modules.get(m)
+            if mod is None:
+                print(f"did not find module {m}")
+                continue
+
+            mod.addInput(name)
+
+#     for key in modules.keys():
+#         m = modules.get(key)
+#         if m is None:
+#             print(f"module {m} not found")
+#             continue
+#
+#         print(f"module {m} is {m.getName()}, has outputs: {m.getModules()} and has inputs: {m.getInputs()}")
+
+    buttonPushes = 100000000
+    pulses = {
+        0: 0,
+        1: 0
+    }
+    for index in range(buttonPushes):
+        q = [{"name": "broadcaster", "pulse": 0, "from": "inputButton"}]
+        while len(q) > 0:
+            nextAction = q.pop(0)
+            name = nextAction.get("name")
+            pulse = nextAction.get("pulse")
+            fr = nextAction.get("from")
+#             print(fr, pulse, name)
+
+            if name == "rx" and pulse == 0:
+                print(index + 1)
+                return 0
+
+
+            pulses[pulse] += 1
+
+            module = modules.get(name)
+
+            if module is None:
+                continue
+
+            module.action(q, pulse, fr)
+
+    print(pulses.get(0) * pulses.get(1))
+
+day20()
