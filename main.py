@@ -1002,8 +1002,21 @@ def myPrint(s, t):
     
     print(f"{prefix}{s}")
 
+mem = {}
+def isInMem(firstNotation, secondNotation):
+    key = f"{firstNotation}-{','.join([str(x) for x in secondNotation])}"
+    return mem.get(key)
+
+def setToMem(firstNotation, secondNotation, result):
+    key = f"{firstNotation}-{','.join([str(x) for x in secondNotation])}"
+    mem[key] = result
+
 def iterate(firstNotation, secondNotation, t):
     # myPrint(f"{firstNotation} - {secondNotation}", t)
+    resultFromMem = isInMem(firstNotation, secondNotation)
+    if resultFromMem is not None:
+        return resultFromMem
+
     firstIndex = 0
     secondIndex = 0
     while firstIndex < len(firstNotation) and firstNotation[firstIndex] != "?":
@@ -1013,12 +1026,14 @@ def iterate(firstNotation, secondNotation, t):
             continue
 
         if secondIndex == len(secondNotation):
+            setToMem(firstNotation, secondNotation, 0)
             return 0
         
         nextGroup = secondNotation[secondIndex]
 
         for i in range(firstIndex, firstIndex + nextGroup):
             if i == len(firstNotation) or firstNotation[i] == ".":
+                setToMem(firstNotation, secondNotation, 0)
                 return 0
         
         if firstIndex + nextGroup == len(firstNotation):
@@ -1026,6 +1041,7 @@ def iterate(firstNotation, secondNotation, t):
             secondIndex += 1
         else:
             if firstNotation[firstIndex + nextGroup] == "#":
+                setToMem(firstNotation, secondNotation, 0)
                 return 0
 
             firstIndex = firstIndex + nextGroup + 1
@@ -1033,7 +1049,9 @@ def iterate(firstNotation, secondNotation, t):
     
     if firstIndex == len(firstNotation):
         if secondIndex == len(secondNotation):
+            setToMem(firstNotation, secondNotation, 1)
             return 1
+        setToMem(firstNotation, secondNotation, 0)
         return 0
 
     # if secondIndex == len(secondNotation):
@@ -1068,63 +1086,43 @@ def iterate(firstNotation, secondNotation, t):
                 
     # myPrint(f"result2 {result2}", t)
 
+    setToMem(firstNotation, secondNotation, result1 + result2)
     return result1 + result2
 
 def day12():
     input = readInputFile("./input/input12.txt")
 
     notations = []
+    concat = 5
     for line in input:
         firstNotation, numbers = line.split(" ")
         secondNotation = [int(x) for x in numbers.split(",")]
 
         firstNotation2 = [c for c in firstNotation]
         secondNotation2 = [x for x in secondNotation]
-        for i in range(1):
+        for i in range(concat-1):
             firstNotation2.append("?")
             for c in firstNotation:
                 firstNotation2.append(c)
             
             for x in secondNotation:
                 secondNotation2.append(x)
-        
-        firstNotation3 = [c for c in firstNotation]
-        secondNotation3 = [x for x in secondNotation]
-        for i in range(2):
-            firstNotation3.append("?")
-            for c in firstNotation:
-                firstNotation3.append(c)
-            
-            for x in secondNotation:
-                secondNotation3.append(x)
-        
+
         notations.append({
-            "first": firstNotation,
-            "second": secondNotation,
-            "first2": firstNotation2,
-            "second2": secondNotation2,
-            "first3": firstNotation3,
-            "second3": secondNotation3,
+            "first": firstNotation2,
+            "second": secondNotation2
         })
     
     sum = 0
     print(len(notations))
-    i = 0
     for notation in notations:
-        i += 1
         firstNotation = notation["first"]
         secondNotation = notation["second"]
 
+        mem = {}
         possibilities = iterate(firstNotation, secondNotation, 0)
-        # print(f'row result {possibilities ** 5}')
 
-        poss2 = iterate(notation["first2"], notation["second2"], 0)
-        y = poss2 // possibilities
-
-        poss3 = iterate(notation["first3"], notation["second3"], 0)
-        print(f"input {firstNotation} and {secondNotation} = {possibilities} - {poss2} ({poss2 / possibilities}) - {poss3} ({poss3 / poss2})")
-
-        sum += possibilities * y ** 4
+        sum += possibilities
     
     print(sum)
 
@@ -1572,6 +1570,900 @@ def day17():
     # print(sum)
 
     # print(vis)
-    
+    nextDirChar = {
+        "0_1": ">",
+        "0_-1": "<",
+        "1_0": "v",
+        "-1_0": "^"
+    }
+    input = readInputFile("./input/input17.txt")
 
-day17()
+    grid = [[int(x) for x in line] for line in input]
+    debug = [["." for x in line] for line in input]
+
+    q = []
+    heapq.heappush(q, (0, 0, 0, 0, 1, 0))
+    vis = {
+        "0_0_0_1_0": 0
+    }
+
+    maxLines = len(grid)
+    maxColumns = len(grid[0])
+
+    minSteps = 4
+    maxSteps = 10
+
+    while len(q) > 0:
+        weight, i, j, dirI, dirJ, stepsInSameDirection = heapq.heappop(q)
+#         print(weight, i, j, dirI, dirJ, stepsInSameDirection)
+        weightInVis = vis.get(f"{i}_{j}_{dirI}_{dirJ}_{stepsInSameDirection}")
+#         if weightInVis is not None and weight > weightInVis:
+#             continue
+
+#         debug[i][j] = nextDirChar.get(f"{dirI}_{dirJ}")
+        nextDirKey = f"{dirI}_{dirJ}"
+        next = nextDir.get(nextDirKey)
+        if next is None:
+            print("next is none")
+            return 0
+
+        for index in range(3):
+            nextDirI, nextDirJ = next[index]
+            if index == 0 and stepsInSameDirection == maxSteps:
+                continue
+
+            if index != 0 and stepsInSameDirection < minSteps and stepsInSameDirection != 0:
+                continue
+
+            nextI = i + nextDirI
+            nextJ = j + nextDirJ
+
+            if nextI < 0 or nextI >= maxLines or nextJ < 0 or nextJ >= maxColumns:
+                continue
+
+            nextWeight = weight + grid[nextI][nextJ]
+            nextSteps = stepsInSameDirection + 1 if index == 0 else 1
+            nextWeightInVis = vis.get(f"{nextI}_{nextJ}_{nextDirI}_{nextDirJ}_{nextSteps}")
+            if nextWeightInVis is None or nextWeightInVis > nextWeight:
+                vis[f"{nextI}_{nextJ}_{nextDirI}_{nextDirJ}_{nextSteps}"] = nextWeight
+                heapq.heappush(q, (nextWeight, nextI, nextJ, nextDirI, nextDirJ, nextSteps))
+
+                if nextI == maxLines - 1 and nextJ == maxColumns - 1 and nextSteps >= minSteps:
+                    print(nextWeight)
+
+def day18sortFunction(a):
+    return a[0]
+
+def hexToNumber(h):
+    hmm = {
+        "0": 0,
+        "1": 1,
+        "2": 2,
+        "3": 3,
+        "4": 4,
+        "5": 5,
+        "6": 6,
+        "7": 7,
+        "8": 8,
+        "9": 9,
+        "a": 10,
+        "b": 11,
+        "c": 12,
+        "d": 13,
+        "e": 14,
+        "f": 15
+    }
+    res = 0
+    for i in range(len(h)):
+        res += hmm.get(h[i]) * 16 ** (len(h) -i - 1)
+
+    return res
+
+def day18():
+    dir = {
+        "U": [-1, 0],
+        "D": [1, 0],
+        "R": [0, 1],
+        "L": [0, -1]
+    }
+
+    dirMap = {
+        "0": "R",
+        "1": "D",
+        "2": "L",
+        "3": "U"
+    }
+
+    input = readInputFile("./input/inpur18.txt")
+
+#     steps = [(dirMap.get(line.split(" ")[2][-2]), hexToNumber(line.split(" ")[2][2:-2])) for line in input]
+    steps = [(line.split(" ")[0], int(line.split(" ")[1])) for line in input]
+    print(f"steps {len(steps)}")
+
+    mini = 0
+    maxi = 0
+
+    minj = 0
+    maxj = 0
+
+    intervalsByLines = {}
+
+    i = 0
+    j = 0
+    volume = 0
+    for step in steps:
+        dirI, dirJ = dir.get(step[0])
+        times = step[1]
+
+        newI = i + dirI * times
+        newJ = j + dirJ * times
+        volume += times
+
+        if step[0] in "LR":
+            intervalsForLine = intervalsByLines.get(i)
+            if intervalsForLine is None:
+                intervalsByLines[i] = [[min(j, newJ), max(j, newJ)]]
+            else:
+                intervalsForLine.append([min(j, newJ), max(j, newJ)])
+
+        i = newI
+        j = newJ
+
+        mini = min(mini, i)
+        maxi = max(maxi, i)
+
+        minj = min(minj, j)
+        maxj = max(maxj, j)
+
+    print(mini, maxi)
+    print(minj, maxj)
+
+    for key in intervalsByLines.keys():
+        intervalsByLines.get(key).sort(key=day18sortFunction)
+
+    intervals = intervalsByLines.get(mini)
+    print(f"initial volume {volume}")
+
+    for line in range(mini + 1, maxi):
+        print("---------------------------")
+        print(f"volume {volume}")
+        print(f"line {line}")
+        print(f"intervals {intervals}")
+        lineIntervals = intervalsByLines.get(line)
+        if lineIntervals is not None:
+            print(f"line intervals {lineIntervals}")
+            newIntervals = []
+
+            index = 0
+            indexLine = 0
+
+            # don't need so many ifs, you can just pick the left side based on if and then scan the rest similarly
+            while index < len(intervals) and indexLine < len(lineIntervals):
+                left = None
+                right = None
+
+                if lineIntervals[indexLine][0] < intervals[index][0]:
+                    left = lineIntervals[indexLine][0]
+                    if lineIntervals[indexLine][1] == intervals[index][0]:
+                        volume -= lineIntervals[indexLine][1] - lineIntervals[indexLine][0]
+                        if indexLine == len(lineIntervals) - 1:
+                            right = intervals[index][0]
+                            index += 1
+                        indexLine += 1
+                    else:
+                        if lineIntervals[indexLine][1] > intervals[index][0]:
+                            print("not good 1")
+
+                        volume -= lineIntervals[indexLine][1] - lineIntervals[indexLine][0] - 1
+                        right = lineIntervals[indexLine][1]
+                        indexLine += 1
+                        newIntervals.append([left, right])
+                        continue
+                elif lineIntervals[indexLine][0] == intervals[index][0]:
+                    if lineIntervals[indexLine][1] >= intervals[index][1]:
+                        print("not good 2")
+
+                    left = lineIntervals[indexLine][1]
+                    if indexLine == len(lineIntervals) - 1:
+                        right = intervals[indexLine][1]
+                        index += 1
+                    indexLine += 1
+                elif lineIntervals[indexLine][0] > intervals[index][0]:
+                    left = intervals[index][0]
+                else:
+                    print("not good 4")
+
+                while indexLine < len(lineIntervals) and index < len(intervals):
+                    if intervals[index][1] != lineIntervals[indexLine][0]:
+                        if intervals[index][1] < lineIntervals[indexLine][0]:
+                            right = intervals[index][1]
+                            index += 1
+                            break
+
+                        # it is >
+                        if intervals[index][1] < lineIntervals[indexLine][1]:
+                            print("not good 6")
+
+                        if intervals[index][1] == lineIntervals[indexLine][1]:
+                            right = lineIntervals[indexLine][0]
+                            index += 1
+                            indexLine += 1
+                            break
+
+                        # it is like i1 i2 j2 j1
+                        right = lineIntervals[indexLine][0]
+                        intervals[index][0] = lineIntervals[indexLine][1]
+                        indexLine += 1
+
+                    volume -= lineIntervals[indexLine][1] - lineIntervals[indexLine][0]
+                    index += 1
+                    if index == len(intervals):
+                        right = lineIntervals[indexLine][1]
+                        indexLine += 1
+                        break
+
+                    if intervals[index][0] != lineIntervals[indexLine][1]:
+                        if intervals[index][0] < lineIntervals[indexLine][1]:
+                            print("not good 7")
+
+                        right = lineIntervals[indexLine][1]
+                        indexLine += 1
+                        break
+
+                    indexLine += 1
+                    if indexLine == len(lineIntervals):
+                        right = intervals[index][1]
+                        index += 1
+                        break
+
+                newIntervals.append([left, right])
+
+            while index < len(intervals):
+                newIntervals.append(intervals[index])
+                index += 1
+            while indexLine < len(lineIntervals):
+                newIntervals.append(lineIntervals[indexLine])
+                volume -= lineIntervals[indexLine][1] - lineIntervals[indexLine][0] - 1
+                indexLine += 1
+
+            intervals = newIntervals
+        else:
+            print("no line intervals")
+
+        for j1, j2 in intervals:
+            volume += j2 - j1 - 1
+
+    print(volume)
+
+def day18part1():
+    dir = {
+        "U": [-1, 0],
+        "D": [1, 0],
+        "R": [0, 1],
+        "L": [0, -1]
+    }
+
+    input = readInputFile("./input/inpur18.txt")
+
+    steps = [(line.split(" ")[0], int(line.split(" ")[1])) for line in input]
+
+    mini = 0
+    maxi = 0
+    minj = 0
+    maxj = 0
+
+    i = 0
+    j = 0
+    grid = {
+        "0_0": "U"
+    }
+    volume = 0
+    lastud = "U"
+    for step in steps:
+        dirI, dirJ = dir.get(step[0])
+        times = step[1]
+
+        if step[0] in "UD":
+            if step[0] != lastud:
+                grid[f"{i}_{j}"] = step[0]
+            lastud = step[0]
+
+        for _ in range(times):
+            volume += 1
+            i += dirI
+            j += dirJ
+            grid[f"{i}_{j}"] = step[0]
+
+        mini = min(mini, i)
+        maxi = max(maxi, i)
+
+        minj = min(minj, j)
+        maxj = max(maxj, j)
+
+    for line in range(mini, maxi + 1):
+        for col in range(minj, maxj + 1):
+            if grid.get(f"{line}_{col}") is not None:
+                continue
+
+            count = 0
+            for newCol in range(col + 1, maxj + 1):
+                cell = grid.get(f"{line}_{newCol}")
+                if cell is None:
+                    continue
+
+                if cell in "UD":
+                    count += 1
+
+            if count % 2 == 1:
+                volume += 1
+
+    print(volume)
+
+def day18part2():
+    dir = {
+        "U": [-1, 0],
+        "D": [1, 0],
+        "R": [0, 1],
+        "L": [0, -1]
+    }
+
+    dirMap = {
+        "0": "R",
+        "1": "D",
+        "2": "L",
+        "3": "U"
+    }
+
+    input = readInputFile("./input/inpur18.txt")
+
+    steps = [(dirMap.get(line.split(" ")[2][-2]), hexToNumber(line.split(" ")[2][2:-2])) for line in input]
+#     steps = [(line.split(" ")[0], int(line.split(" ")[1])) for line in input]
+    print(f"steps {len(steps)}")
+
+    mini = 0
+    maxi = 0
+
+    minj = 0
+    maxj = 0
+
+    intervalsByLines = {}
+
+
+#     debug = {}
+    i = 0
+    j = 0
+    for step in steps:
+        dirI, dirJ = dir.get(step[0])
+        times = step[1]
+
+        newI = i + dirI * times
+        newJ = j + dirJ * times
+
+#         auxi = i
+#         auxj = j
+#         for _ in range(times):
+#             auxi += dirI
+#             auxj += dirJ
+#             debug[f"{auxi}_{auxj}"] = "#"
+
+        if step[0] in "LR":
+            intervalsForLine = intervalsByLines.get(i)
+            if intervalsForLine is None:
+                intervalsByLines[i] = [[min(j, newJ), max(j, newJ)]]
+            else:
+                intervalsForLine.append([min(j, newJ), max(j, newJ)])
+
+        i = newI
+        j = newJ
+
+        mini = min(mini, i)
+        maxi = max(maxi, i)
+
+        minj = min(minj, j)
+        maxj = max(maxj, j)
+
+    print(mini, maxi)
+    print(minj, maxj)
+
+    #     -209 184
+    #     -132 216
+#     for x in range(-209, 185):
+#         for y in range(-132, 217):
+#             if debug.get(f"{x}_{y}") is None:
+#                 print(".", end="")
+#             else:
+#                 print("#", end="")
+#         print("")
+
+    volume = 0
+    print(volume)
+    print(f"lines with intervals {len(intervalsByLines.keys())}")
+    for key in intervalsByLines.keys():
+        intervalsByLines.get(key).sort(key=day18sortFunction)
+
+    intervals = intervalsByLines.get(mini)
+    for j1, j2 in intervals:
+        volume += j2 - j1 + 1
+
+    print(f"initial volume {volume}")
+
+    for line in range(mini + 1, maxi):
+#         print("---------------------------")
+#         print(f"volume {volume}")
+#         print(f"line {line}")
+#         print(f"intervals {intervals}")
+        lineIntervals = intervalsByLines.get(line)
+        if lineIntervals is not None:
+#             print(f"line intervals {lineIntervals}")
+            newIntervals = []
+
+            index = 0
+            indexLine = 0
+
+            # don't need so many ifs, you can just pick the left side based on if and then scan the rest similarly
+            while index < len(intervals) and indexLine < len(lineIntervals):
+                left = None
+                right = None
+                whereToLook = None
+
+                if intervals[index][0] < lineIntervals[indexLine][0]:
+                    whereToLook = 2
+                    left = intervals[index][0]
+                elif intervals[index][0] == lineIntervals[indexLine][0]:
+                    if lineIntervals[indexLine][1] == intervals[index][1]:
+                        volume += lineIntervals[indexLine][1] - lineIntervals[indexLine][0] + 1
+                        indexLine += 1
+                        index += 1
+                        continue
+                    elif lineIntervals[indexLine][1] > intervals[index][1]:
+                        print("not good 1")
+
+                    whereToLook = 2
+                    volume += lineIntervals[indexLine][1] - lineIntervals[indexLine][0]
+                    left = lineIntervals[indexLine][1]
+                    indexLine += 1
+                elif intervals[index][0] > lineIntervals[indexLine][0]:
+                    whereToLook = 1
+                    left = lineIntervals[indexLine][0]
+                else:
+                    print("not good 2")
+                    return 0
+
+                while indexLine < len(lineIntervals) and index < len(intervals):
+                    if whereToLook == 1: # check intervals
+                        if lineIntervals[indexLine][1] < intervals[index][0]:
+                            right = lineIntervals[indexLine][1]
+                            indexLine += 1
+                            break
+
+                        if lineIntervals[indexLine][1] == intervals[index][0]:
+                            whereToLook = 2
+                            indexLine += 1
+                            continue
+
+                        # lineIntervals[indexLine][1] > intervals[index][0] - should not happen
+                        print("not good 3")
+                        return 0
+                    else: # whereToLook == 2
+                        if intervals[index][1] < lineIntervals[indexLine][0]:
+                            right = intervals[index][1]
+                            index += 1
+                            break
+
+                        if intervals[index][1] == lineIntervals[indexLine][0]:
+                            whereToLook = 1
+                            index += 1
+                            continue
+
+                        # intervals[index][1] > lineIntervals[indexLine][0]
+                        if lineIntervals[indexLine][1] < intervals[index][1]:
+                            right = lineIntervals[indexLine][0]
+                            intervals[index][0] = lineIntervals[indexLine][1]
+                            volume += lineIntervals[indexLine][1] - lineIntervals[indexLine][0] - 1
+                            indexLine += 1
+                            break
+
+                        if lineIntervals[indexLine][1] == intervals[index][1]:
+                            right = lineIntervals[indexLine][0]
+                            volume += lineIntervals[indexLine][1] - lineIntervals[indexLine][0]
+                            index += 1
+                            indexLine += 1
+                            break
+
+                        # it should not reach this one
+                        print("not good 4")
+                        return 0
+
+                if indexLine == len(lineIntervals):
+                    if whereToLook == 2 and right is None:
+                        right = intervals[index][1]
+                        index += 1
+                elif index == len(intervals):
+                    if whereToLook == 1 and right is None:
+                        right = lineIntervals[indexLine][1]
+                        indexLine += 1
+
+                newIntervals.append([left, right])
+
+            while index < len(intervals):
+                newIntervals.append(intervals[index])
+                index += 1
+            while indexLine < len(lineIntervals):
+                newIntervals.append(lineIntervals[indexLine])
+                indexLine += 1
+
+            intervals = newIntervals
+#         else:
+#             print("no line intervals")
+
+        for j1, j2 in intervals:
+            volume += j2 - j1 + 1
+
+
+    for j1, j2 in intervalsByLines.get(maxi):
+        volume += j2 - j1 + 1
+
+    print(volume)
+
+def day19():
+    input = readInputFile("./input/input19.txt")
+
+    splitIndex = input.index("")
+    workflows = {}
+    for workflow in input[:splitIndex]:
+        name, rest = workflow.split("{")
+
+        checks = []
+        checksRaw = rest[:-1].split(",")
+        for check in checksRaw[:-1]:
+            conditionRaw, newWorkflow = check.split(":")
+
+            category = None
+            comparison = None
+            number = None
+            if "<" in conditionRaw:
+                category = conditionRaw.split("<")[0]
+                comparison = "<"
+                number = int(conditionRaw.split("<")[1])
+            elif ">" in conditionRaw:
+                category = conditionRaw.split(">")[0]
+                comparison = ">"
+                number = int(conditionRaw.split(">")[1])
+            else:
+                print(f"not good {conditionRaw}")
+
+            checks.append({
+                "category": category,
+                "comparison": comparison,
+                "number": number,
+                "workflow": newWorkflow
+            })
+
+        checks.append({
+            "workflow": checksRaw[-1]
+        })
+
+        workflows[name] = checks
+
+
+    parts = []
+    for p in input[splitIndex + 1:]:
+        categories = {}
+        for c in p[1:-1].split(","):
+            category = c.split("=")[0]
+            rating = int(c.split("=")[1])
+            categories[category] = rating
+        parts.append(categories)
+
+#     sum = 0
+#     for part in parts:
+#         workflow = "in"
+#
+#         while workflow not in "AR":
+#             checks = workflows.get(workflow)
+#
+#             for check in checks:
+#                 newWorkflow = check.get("workflow")
+#
+#                 category = check.get("category")
+#                 comparison = check.get("comparison")
+#                 number = check.get("number")
+#                 if comparison is None:
+#                     workflow = newWorkflow
+#                     break
+#                 elif comparison == "<":
+#                     if part.get(category) < number:
+#                         workflow = newWorkflow
+#                         break
+#                 elif comparison == ">":
+#                     if part.get(category) > number:
+#                         workflow = newWorkflow
+#                         break
+#                 else:
+#                     print("not good at all")
+#
+#         if workflow == "A":
+#             sum += part.get("x") + part.get("m") + part.get("a") + part.get("s")
+#     print(sum)
+    q = [
+        {
+            "workflow": "in",
+            "x": [1, 4000],
+            "m": [1, 4000],
+            "a": [1, 4000],
+            "s": [1, 4000]
+        }
+    ]
+    acceptedParts = []
+    while len(q) > 0:
+        part = q.pop(0)
+        workflow = part.get("workflow")
+        x = part.get("x")
+        m = part.get("m")
+        a = part.get("a")
+        s = part.get("s")
+#         print(workflow, x, m, a, s)
+
+        if workflow == "A":
+            acceptedParts.append({
+                "x": x,
+                "m": m,
+                "a": a,
+                "s": s
+            })
+            continue
+        if workflow == "R":
+            continue
+
+        checks = workflows.get(workflow)
+        for check in checks:
+            newWorkflow = check.get("workflow")
+
+            category = check.get("category")
+            comparison = check.get("comparison")
+            number = check.get("number")
+
+            if comparison is None:
+                q.append({
+                    "workflow": newWorkflow,
+                    "x": x,
+                    "m": m,
+                    "a": a,
+                    "s": s
+                })
+            elif comparison == "<":
+                if number > part.get(category)[1]:
+                    q.append({
+                        "workflow": newWorkflow,
+                        "x": x,
+                        "m": m,
+                        "a": a,
+                        "s": s
+                    })
+                    break
+                elif number <= part.get(category)[0]:
+                    continue
+                else:
+                    newPart = {
+                        "workflow": newWorkflow,
+                        "x": [x[0], x[1]],
+                        "m": [m[0], m[1]],
+                        "a": [a[0], a[1]],
+                        "s": [s[0], s[1]]
+                    }
+                    newPart[category][1] = number - 1
+                    part[category][0] = number
+                    q.append(newPart)
+            elif comparison == ">":
+                if number < part.get(category)[0]:
+                    q.append({
+                        "workflow": newWorkflow,
+                        "x": x,
+                        "m": m,
+                        "a": a,
+                        "s": s
+                    })
+                    break
+                elif number >= part.get(category)[1]:
+                    continue
+                else:
+                    newPart = {
+                        "workflow": newWorkflow,
+                        "x": [x[0], x[1]],
+                        "m": [m[0], m[1]],
+                        "a": [a[0], a[1]],
+                        "s": [s[0], s[1]]
+                    }
+                    newPart[category][0] = number + 1
+                    part[category][1] = number
+                    q.append(newPart)
+            else:
+                print("not good")
+
+#     product = 1
+#     for part in acceptedParts:
+#         product *= part.get("x")[1] - part.get("x")[0] + 1
+#         product *= part.get("m")[1] - part.get("m")[0] + 1
+#         product *= part.get("a")[1] - part.get("a")[0] + 1
+#         product *= part.get("s")[1] - part.get("s")[0] + 1
+#     print(product)
+#     print(len(acceptedParts))
+    result = 0
+#     for a in acceptedParts:
+#         print(a)
+#     for index in range(len(acceptedParts)):
+#         part = acceptedParts[index]
+#         cs = {
+#             "x": [part.get("x")[0], part.get("x")[1]],
+#             "m": [part.get("m")[0], part.get("m")[1]],
+#             "a": [part.get("a")[0], part.get("a")[1]],
+#             "s": [part.get("s")[0], part.get("s")[1]],
+#         }
+#
+#         newInterval = False
+#         for j in range(index):
+#             print("da")
+#
+#         if newInterval is True:
+#             result += (cs.get("x")[1] - cs.get("x")[0] + 1) * (cs.get("m")[1] - cs.get("m")[0] + 1) * (cs.get("a")[1] - cs.get("a")[0] + 1) * (cs.get("s")[1] - cs.get("s")[0] + 1)
+#         else:
+#             result += (cs.get("x")[1] - cs.get("x")[0] + 1) * (part.get("m")[1] - part.get("m")[0] + 1) * (part.get("a")[1] - part.get("a")[0] + 1) * (part.get("s")[1] - part.get("s")[0] + 1)
+#             result += (part.get("x")[1] - part.get("x")[0] + 1) * (cs.get("m")[1] - cs.get("m")[0] + 1) * (part.get("a")[1] - part.get("a")[0] + 1) * (part.get("s")[1] - part.get("s")[0] + 1)
+#             result += (part.get("x")[1] - part.get("x")[0] + 1) * (part.get("m")[1] - part.get("m")[0] + 1) * (cs.get("a")[1] - cs.get("a")[0] + 1) * (part.get("s")[1] - part.get("s")[0] + 1)
+#             result += (part.get("x")[1] - part.get("x")[0] + 1) * (part.get("m")[1] - part.get("m")[0] + 1) * (part.get("a")[1] - part.get("a")[0] + 1) * (cs.get("s")[1] - cs.get("s")[0] + 1)
+    for cs in acceptedParts:
+        result += (cs.get("x")[1] - cs.get("x")[0] + 1) * (cs.get("m")[1] - cs.get("m")[0] + 1) * (cs.get("a")[1] - cs.get("a")[0] + 1) * (cs.get("s")[1] - cs.get("s")[0] + 1)
+    print(result)
+
+class broadcaster:
+    def __init__(self, name, modules):
+        self.name = name
+        self.modules = modules
+        self.inputs = {}
+
+    def action(self, q, pulse, fromModule):
+        for m in self.modules:
+            q.append({"name": m, "pulse": pulse, "from": self.name})
+
+    def addInput(self, input):
+        self.inputs[input] = 0
+
+    def getName(self):
+        return "broad"
+
+    def getModules(self):
+        return self.modules
+
+    def getInputs(self):
+        return self.inputs.keys()
+
+class flipflop:
+    def __init__(self, name, modules):
+        self.state = 0
+        self.name = name
+        self.modules = modules
+        self.inputs = {}
+
+    def action(self, q, pulse, fromModule):
+        if pulse == 1:
+            return
+
+        if self.state == 0:
+            self.state = 1
+        else:
+            self.state = 0
+
+        for m in self.modules:
+            q.append({"name": m, "pulse": self.state, "from": self.name})
+
+    def addInput(self, input):
+        self.inputs[input] = 0
+
+    def getName(self):
+        return "flip"
+
+    def getModules(self):
+        return self.modules
+
+    def getInputs(self):
+        return self.inputs.keys()
+
+class conjunction:
+    def __init__(self, name, modules):
+        self.name = name
+        self.modules = modules
+        self.inputs = {}
+
+    def action(self, q, pulse, fromModule):
+        self.inputs[fromModule] = pulse
+
+        nextPulse = self.getNextPulse()
+        for m in self.modules:
+            q.append({"name": m, "pulse": nextPulse, "from": self.name})
+
+    def getNextPulse(self):
+        for key in self.inputs:
+            if self.inputs.get(key) == 0:
+                return 1
+        return 0
+
+    def addInput(self, input):
+        self.inputs[input] = 0
+
+    def getName(self):
+        return "conj"
+
+    def getModules(self):
+        return self.modules
+
+    def getInputs(self):
+        return self.inputs.keys()
+
+def day20():
+    input = readInputFile("./input/input20.txt")
+
+    modules = {}
+    for line in input:
+        nameAndType, moduleNames = line.split(" -> ")
+
+        if nameAndType[0] == "%":
+            modules[nameAndType[1:]] = flipflop(nameAndType[1:], moduleNames.split(", "))
+        elif nameAndType[0] == "&":
+            modules[nameAndType[1:]] = conjunction(nameAndType[1:], moduleNames.split(", "))
+        else:
+            modules[nameAndType] = broadcaster(nameAndType, moduleNames.split(", "))
+
+    for line in input:
+        nameAndType, moduleNames = line.split(" -> ")
+
+        name = None
+        if nameAndType[0] in "%&":
+            name = nameAndType[1:]
+        else:
+            name = nameAndType
+
+        for m in moduleNames.split(", "):
+            mod = modules.get(m)
+            if mod is None:
+                print(f"did not find module {m}")
+                continue
+
+            mod.addInput(name)
+
+#     for key in modules.keys():
+#         m = modules.get(key)
+#         if m is None:
+#             print(f"module {m} not found")
+#             continue
+#
+#         print(f"module {m} is {m.getName()}, has outputs: {m.getModules()} and has inputs: {m.getInputs()}")
+
+    buttonPushes = 100000000
+    pulses = {
+        0: 0,
+        1: 0
+    }
+    for index in range(buttonPushes):
+        q = [{"name": "broadcaster", "pulse": 0, "from": "inputButton"}]
+        while len(q) > 0:
+            nextAction = q.pop(0)
+            name = nextAction.get("name")
+            pulse = nextAction.get("pulse")
+            fr = nextAction.get("from")
+#             print(fr, pulse, name)
+
+            if name == "rx" and pulse == 0:
+                print(index + 1)
+                return 0
+
+
+            pulses[pulse] += 1
+
+            module = modules.get(name)
+
+            if module is None:
+                continue
+
+            module.action(q, pulse, fr)
+
+    print(pulses.get(0) * pulses.get(1))
