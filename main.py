@@ -1482,4 +1482,96 @@ def day16():
 
     print(max)
 
-day16()
+import heapq
+
+def day17():
+    # nextDir = {
+    #     "0_1": {
+    #         3: [[0, 1, 1], [1, 0, 0], [-1, 0, 0]],
+    #         2: [[1, 0, 0], [-1, 0, 0]]
+    #     },
+    #     "0_-1": {
+    #         3: [[0, -1, 1], [1, 0, 0], [-1, 0, 0]],
+    #         2: [[1, 0, 0], [-1, 0, 0]]
+    #     },
+    #     "1_0": {
+    #         3: [[1, 0, 1], [0, 1, 0], [0, -1, 0]],
+    #         2: [[0, 1, 0], [0, -1, 0]]
+    #     },
+    #     "-1_0": {
+    #         3: [[-1, 0, 1], [0, 1, 0], [0, -1, 0]],
+    #         2: [[0, 1, 0], [0, -1, 0]]
+    #     }
+    # }
+
+    nextDir = {
+        "0_1": [[0, 1], [1, 0], [-1, 0]],
+        "0_-1": [[0, -1], [1, 0], [-1, 0]],
+        "1_0": [[1, 0], [0, 1], [0, -1]],
+        "-1_0": [[-1, 0], [0, 1], [0, -1]]
+    }
+
+    input = readInputFile("./input/input17test.txt")
+
+    grid = [[int(x) for x in line] for line in input]
+
+    q = []
+    heapq.heappush(q, (0, 0, 0, 0, 1, 0))
+    heapq.heappush(q, (0, 0, 0, 1, 0, 0))
+    
+    while len(q) > 0:
+        el = heapq.heappop(q)
+    # q = [
+    #     [0, 0, 0, 1, 1],
+    #     [0, 0, 1, 0, 1]
+    # ]
+    # vis = {
+    #     "0_0_0_1": 1,
+    #     "0_0_1_0": 1
+    # }
+
+    # while len(q) > 0:
+    #     i, j, dirI, dirJ, type = q.pop(0)
+
+    #     dirKey = f"{dirI}_{dirJ}"
+    #     nextDirs = nextDir.get(dirKey)
+    #     if nextDirs is None:
+    #         print("error nextDirs is none")
+    #         return 0
+        
+    #     dirType = 3 if type < 3 else 2
+    #     nextDirs2 = nextDirs.get(dirType)
+    #     if nextDirs2 is None:
+    #         print("error nextDirs2 is none")
+    #         return 0
+        
+    #     currentVisKey = f"{i}_{j}_{dirI}_{dirJ}"
+    #     currentVis = vis.get(currentVisKey)
+    #     # currentWeight = currentVis if currentVis is not None else 0
+    #     currentWeight = currentVis
+
+    #     nextCells = [[i + nextDirI, j + nextDirJ, nextDirI, nextDirJ, 1 if t == 0 else type + 1] for [nextDirI, nextDirJ, t] in nextDirs2]
+    #     for nextCell in nextCells:
+    #         if nextCell[0] < 0 or nextCell[0] >= len(grid) or nextCell[1] < 0 or nextCell[1] >= len(grid[0]):
+    #             continue
+
+    #         visKey = f"{nextCell[0]}_{nextCell[1]}_{nextCell[2]}_{nextCell[3]}"
+    #         visited = vis.get(visKey)
+    #         if visited is None or visited > currentWeight + grid[nextCell[0]][nextCell[1]]:
+    #             vis[visKey] = currentWeight + grid[nextCell[0]][nextCell[1]]
+    #             q.append(nextCell)
+
+    # print(vis.get(f"{len(grid) - 1}_{len(grid[0]) - 1}_{0}_{1}"))
+    # print(vis.get(f"{len(grid) - 1}_{len(grid[0]) - 1}_{1}_{0}"))
+
+    # a = [4, 1, 1, 5, 4, 5, 3, 2, 3, 1, 3, 5, 4, 2, 4, 5, 3, 5, 6, 5, 3, 7, 3, 3, 6, 3, 3, 3]
+    # sum = 0
+    # for x in a:
+    #     sum += x
+
+    # print(sum)
+
+    # print(vis)
+    
+
+day17()
