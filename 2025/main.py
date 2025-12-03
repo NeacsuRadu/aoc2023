@@ -133,8 +133,55 @@ def task_2_2():
 
     print(sum_of_invalids)
 
+def task_3_1_find_leftmost_max(s, start, end):
+    max_digit = int(s[end])
+    max_digit_position = end
+
+    for i in range(end - 1, start - 1, -1):
+        if int(s[i]) >= max_digit:
+            max_digit = int(s[i])
+            max_digit_position = i
+    
+    return [max_digit, max_digit_position]
+
+def task_3_resolve(input, number_of_batteries):
+    s = 0
+    for line in input:
+
+        position = 0
+        digits = []
+        for battery in range(number_of_batteries, 0, -1):
+            [max_digit, max_position] = task_3_1_find_leftmost_max(line, position, len(line) - battery)
+
+            position = max_position + 1
+            digits.append(max_digit)
+
+        n = 0
+        for digit in digits:
+            n = n * 10 + digit
+        
+        s+= n
+    
+    return s
+
+def task_3_1():
+    input = readInputFile("./input/input_3.txt")
+    # test input
+    # input = ["987654321111111", "811111111111119", "234234234234278", "818181911112111"]
+
+    s = task_3_resolve(input, 2)
+
+    print(s)
+
+def task_3_2():
+    input = readInputFile("./input/input_3.txt")
+
+    s = task_3_resolve(input, 12)
+
+    print(s)
+
 def main():
-    task_2_2()
+    task_3_2()
 
 if __name__ == '__main__':
     main()
