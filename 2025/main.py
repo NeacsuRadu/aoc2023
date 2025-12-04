@@ -8,6 +8,21 @@ def readInputFile(path):
                 result.append(line)
     return result
 
+def readInputFileToMatrix(path):
+    input = readInputFile(path)
+
+    result = []
+
+    i = 0
+    for line in input:
+        result.append([])
+
+        for c in line:
+            result[i].append(c)
+        
+        i += 1
+    
+    return result
 
 def task_1_1():
     input = readInputFile("./input/input_1_1.txt")
@@ -180,8 +195,89 @@ def task_3_2():
 
     print(s)
 
+def task_4_can_access_paper_roll(input, i, j):
+    positions = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]
+    max_adjacent_rolls = 4
+
+    adjacent_rolls = 0
+
+    input_len = len(input)
+    line_len = len(input[i])
+    adjacent_rolls = 0
+    for position in positions:
+        if i + position[0] < 0 or i + position[0] >= input_len or j + position[1] < 0 or j + position[1] >= line_len:
+            continue
+
+        if input[i + position[0]][j + position[1]] == '@':
+            adjacent_rolls += 1
+    
+    return adjacent_rolls < max_adjacent_rolls
+
+def task_4_remove_paper_roll(input, i, j):
+    input[i][j] = "."
+
+    positions = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]
+
+    input_len = len(input)
+    line_len = len(input[i])
+    rolls_to_be_removed = []
+    for position in positions:
+        if i + position[0] < 0 or i + position[0] >= input_len or j + position[1] < 0 or j + position[1] >= line_len:
+            continue
+
+        if task_4_can_access_paper_roll(input, i + position[0], j + position[1]):
+            rolls_to_be_removed.append([i + position[0], j + position[1]])
+    
+    return rolls_to_be_removed
+
+def task_4_1():
+    input = readInputFile("./input/input_4.txt")
+
+    number_of_rolls = 0
+
+    input_len = len(input)
+    for i in range(input_len):
+        line_len = len(input[i])
+        for j in range(line_len):
+            if input[i][j] != '@':
+                continue
+            
+            if task_4_can_access_paper_roll(input, i, j):
+                number_of_rolls += 1
+
+    print(number_of_rolls)
+
+def task_4_2():
+    input = readInputFileToMatrix("./input/input_4.txt")
+
+    rolls_to_be_removed = []
+    input_len = len(input)
+    for i in range(input_len):
+        line_len = len(input[i])
+        for j in range(line_len):
+            if input[i][j] != '@':
+                continue
+            
+            if task_4_can_access_paper_roll(input, i, j):
+                rolls_to_be_removed.append([i, j])
+
+    number_of_rolls = 0
+
+    while rolls_to_be_removed:
+        [i, j] = rolls_to_be_removed.pop(0)
+        if input[i][j] != "@":
+            continue
+
+        number_of_rolls += 1
+
+        other_rolls_to_be_removed = task_4_remove_paper_roll(input, i, j)
+
+        rolls_to_be_removed.extend(other_rolls_to_be_removed)
+
+    print(number_of_rolls)
+
 def main():
-    task_3_2()
+    task_4_2()
 
 if __name__ == '__main__':
     main()
