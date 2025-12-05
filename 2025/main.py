@@ -1,3 +1,6 @@
+from zoneinfo import available_timezones
+
+
 def readInputFile(path):
     result = []
     with open(path, 'r') as f:
@@ -276,8 +279,83 @@ def task_4_2():
 
     print(number_of_rolls)
 
+def task_5_1():
+    input = readInputFile("./input/input_5.txt")
+
+    read_available_items = False
+    fresh_items = 0
+    ranges = []
+    for line in input:
+        if line == '':
+            read_available_items = True
+            continue
+    
+        if read_available_items:
+            item = int(line)
+
+            is_fresh = False
+            for r in ranges:
+                if item >= r[0] and item <= r[1]:
+                    is_fresh = True
+                    break
+            
+            if is_fresh:
+                fresh_items += 1
+            
+            continue
+            
+        aux = line.split('-')
+        left = int(aux[0])
+        right = int(aux[1])
+
+        ranges.append([left, right])
+    
+    print(fresh_items)
+
+def task_5_2():
+    input = readInputFile("./input/input_5.txt")
+
+    fresh_items = 0
+    ranges = []
+    for line in input:
+        if line == '':
+            break
+    
+        aux = line.split('-')
+        left = int(aux[0])
+        right = int(aux[1])
+
+        ranges.append([left, right])
+
+    ranges.sort(key = lambda r: r[0])
+
+    leftmost_left = ranges[0][0]
+    rightmost_right = ranges[0][1]
+    fresh_items += rightmost_right - leftmost_left + 1
+    for i in range(1, len(ranges)):
+        r = ranges[i]
+
+        if r[0] > rightmost_right:
+            leftmost_left = r[0]
+            rightmost_right = r[1]
+            fresh_items += rightmost_right - leftmost_left + 1
+            continue
+            
+        if r[0] == rightmost_right:
+            fresh_items += r[1] - rightmost_right
+            rightmost_right = r[1]
+            continue
+
+        if r[1] <= rightmost_right:
+            continue
+
+        fresh_items += r[1] - rightmost_right
+        rightmost_right = r[1]
+    
+    print(fresh_items)
+
 def main():
-    task_4_2()
+    task_5_2()
 
 if __name__ == '__main__':
     main()
