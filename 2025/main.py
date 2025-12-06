@@ -1,5 +1,5 @@
-from zoneinfo import available_timezones
-
+from functools import reduce
+from re import A
 
 def readInputFile(path):
     result = []
@@ -354,8 +354,78 @@ def task_5_2():
     
     print(fresh_items)
 
+def task_6_1():
+    input = readInputFile('./input/input_6.txt')
+
+    result = 0
+    series = []
+    for line in input:
+        if line.find('*') != -1 or line.find('+') != -1:
+            operators = line.split()
+
+            for i in range(len(operators)):
+                add = lambda x, y: x + y
+                multiply = lambda x, y: x * y
+
+                operation = add if operators[i] == '+' else multiply
+
+                aux = reduce(operation, series[i])
+                # print(aux)
+                result += aux
+            continue
+
+        numbers = list(map(lambda n: int(n), line.split()))
+        for i in range(len(numbers)):
+            if i >= len(series):
+                series.append([])
+            
+            series[i].append(numbers[i])
+    
+    print(result)
+
+def task_6_2():
+    input = readInputFile('./input/input_6.txt')
+
+    result = 0
+    better_input = []
+    for line in input:
+        better_input.append(line)
+    
+    length = len(better_input[0])
+    number_of_operands = len(better_input) - 1
+
+    p = length - 1
+    series = []
+    while p >= 0:
+        n = 0
+
+        for j in range(number_of_operands):
+            c = better_input[j][p]
+            if c == ' ':
+                continue
+
+            n = n * 10 + int(c)
+        
+        series.append(n)
+
+        if better_input[number_of_operands][p] == '*' or better_input[number_of_operands][p] == '+':
+            add = lambda x, y: x + y
+            multiply = lambda x, y: x * y
+
+            op = add if better_input[number_of_operands][p] == '+' else multiply
+            res = reduce(op, series)
+            result += res
+
+            p -= 2
+            series = []
+        else:
+            p -= 1
+    
+    print(result)
+
+
 def main():
-    task_5_2()
+    task_6_2()
 
 if __name__ == '__main__':
     main()
