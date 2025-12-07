@@ -423,9 +423,88 @@ def task_6_2():
     
     print(result)
 
+def task_7_1_insert_if_not_exists(beams, x, y):
+    found = False
+    for beam in beams:
+        if beam[0] == x and beam[1] == y:
+            found = True
+            break
+    
+    if not found:
+        beams.append([x, y])
+
+def task_7_1():
+    input = readInputFileToMatrix('./input/input_7.txt')
+
+    start_character = 'S'
+    splitter_character = '^'
+
+    start_i = 0
+    start_j = None
+    for j in range(len(input[0])):
+        if input[0][j] == start_character:
+            start_j = j
+    
+    beams = [[start_i + 1, start_j]]
+    splits = 0
+
+    while beams:
+        beam = beams.pop(0)
+        # print(beam)
+        if beam[0] + 1 >= len(input):
+            continue
+
+        if input[beam[0] + 1][beam[1]] != splitter_character:
+            task_7_1_insert_if_not_exists(beams, beam[0] + 1, beam[1])
+            continue
+        
+        splits += 1
+
+        if beam[1] - 1 >= 0:
+            task_7_1_insert_if_not_exists(beams, beam[0] + 1, beam[1] - 1)
+        
+        if beam[1] + 1 < len(input[beam[0] + 1]):
+            task_7_1_insert_if_not_exists(beams, beam[0] + 1, beam[1] + 1)
+    
+    print(splits)
+
+task_7_2_mem = {}
+
+def task_7_2_solve(input, x, y):
+    if task_7_2_mem.get(f'{x}-{y}') is not None:
+        return task_7_2_mem.get(f'{x}-{y}')
+
+    if x == len(input) - 1:
+        return 1
+    
+    if input[x + 1][y] == '.':
+        down = task_7_2_solve(input, x + 1, y)
+        task_7_2_mem[f'{x}-{y}'] = down
+        return down
+    
+    left = 0 if y == 0 else task_7_2_solve(input, x + 1, y - 1)
+    right = 0 if y == len(input[x + 1]) - 1 else task_7_2_solve(input, x + 1, y + 1)
+
+    task_7_2_mem[f'{x}-{y}'] = left + right
+    return left + right
+
+def task_7_2():
+    input = readInputFileToMatrix('./input/input_7.txt')
+
+    start_character = 'S'
+
+    start_i = 0
+    start_j = None
+    for j in range(len(input[0])):
+        if input[0][j] == start_character:
+            start_j = j
+    
+    timelines = task_7_2_solve(input, start_i + 1, start_j)
+    
+    print(timelines)
 
 def main():
-    task_6_2()
+    task_7_2()
 
 if __name__ == '__main__':
     main()
