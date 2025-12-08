@@ -1,5 +1,6 @@
 from functools import reduce
 from re import A
+from turtle import left
 
 def readInputFile(path):
     result = []
@@ -503,8 +504,137 @@ def task_7_2():
     
     print(timelines)
 
+def task_8_1():
+    input = readInputFile('./input/input_8.txt')
+    iterations = 1000
+
+    points = []
+    for line in input:
+        aux = line.split(',')
+
+        points.append([int(aux[0]), int(aux[1]), int(aux[2])])
+    
+    edges = []
+    for i in range(len(points) - 1):
+        for j in range(i + 1, len(points)):
+            edges.append([points[i], points[j]])
+    
+    distance_fnc = lambda x: (x[1][0] - x[0][0]) * (x[1][0] - x[0][0]) + (x[1][1] - x[0][1]) * (x[1][1] - x[0][1]) + (x[1][2] - x[0][2]) * (x[1][2] - x[0][2])
+
+    edges.sort(key=distance_fnc)
+
+    components = []
+
+    for i in range(iterations):
+        edge = edges[i]
+
+        left_found = -1
+        right_found = -1
+        for j in range(len(components)):
+            component = components[j]
+            for point in component:
+
+                if point[0] == edge[0][0] and point[1] == edge[0][1] and point[2] == edge[0][2]:
+                    left_found = j
+            
+                if point[0] == edge[1][0] and point[1] == edge[1][1] and point[2] == edge[1][2]:
+                    right_found = j
+            
+            if left_found >= 0 and right_found >= 0:
+                break
+        
+        if left_found == -1 and right_found == -1:
+            components.append([edge[0], edge[1]])
+            continue
+            
+        if left_found >= 0 and right_found == -1:
+            components[left_found].append(edge[1])
+            continue
+        
+        if right_found >= 0 and left_found == -1:
+            components[right_found].append(edge[0])
+            continue
+        
+        if left_found == right_found:
+            continue
+        
+        components[left_found].extend(components[right_found])
+        components.pop(right_found)
+    
+    sizes = list(map(lambda c: len(c), components))
+    sizes.sort(reverse=True)
+
+    print(sizes[0] * sizes[1] * sizes[2])
+
+def task_8_2():
+    input = readInputFile('./input/input_8.txt')
+
+    points = []
+    for line in input:
+        aux = line.split(',')
+
+        points.append([int(aux[0]), int(aux[1]), int(aux[2])])
+    
+    edges = []
+    for i in range(len(points) - 1):
+        for j in range(i + 1, len(points)):
+            edges.append([points[i], points[j]])
+    
+    distance_fnc = lambda x: (x[1][0] - x[0][0]) * (x[1][0] - x[0][0]) + (x[1][1] - x[0][1]) * (x[1][1] - x[0][1]) + (x[1][2] - x[0][2]) * (x[1][2] - x[0][2])
+
+    edges.sort(key=distance_fnc)
+
+    components = []
+
+    i = -1
+    last_edge = None
+    while True:
+        if len(components) == 1 and len(components[0]) == len(points):
+            break
+        i += 1
+        edge = edges[i]
+        last_edge = edge
+
+        left_found = -1
+        right_found = -1
+        for j in range(len(components)):
+            component = components[j]
+            for point in component:
+
+                if point[0] == edge[0][0] and point[1] == edge[0][1] and point[2] == edge[0][2]:
+                    left_found = j
+            
+                if point[0] == edge[1][0] and point[1] == edge[1][1] and point[2] == edge[1][2]:
+                    right_found = j
+            
+            if left_found >= 0 and right_found >= 0:
+                break
+        
+        if left_found == -1 and right_found == -1:
+            components.append([edge[0], edge[1]])
+            continue
+            
+        if left_found >= 0 and right_found == -1:
+            components[left_found].append(edge[1])
+            continue
+        
+        if right_found >= 0 and left_found == -1:
+            components[right_found].append(edge[0])
+            continue
+        
+        if left_found == right_found:
+            continue
+        
+        components[left_found].extend(components[right_found])
+        components.pop(right_found)
+    
+    sizes = list(map(lambda c: len(c), components))
+    sizes.sort(reverse=True)
+
+    print(last_edge[0][0] * last_edge[1][0])
+
 def main():
-    task_7_2()
+    task_8_2()
 
 if __name__ == '__main__':
     main()
