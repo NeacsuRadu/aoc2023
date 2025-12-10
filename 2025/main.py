@@ -1,4 +1,5 @@
 from functools import reduce
+from mimetypes import init
 from re import A
 from turtle import left
 
@@ -633,8 +634,129 @@ def task_8_2():
 
     print(last_edge[0][0] * last_edge[1][0])
 
+def task_9_1():
+    input = readInputFile('./input/input_9.txt')
+
+    points = []
+    for line in input:
+        points.append(list(map(lambda x: int(x), line.split(","))))
+    
+    m = 0
+
+    for i in range(len(points) - 1):
+        for j in range(i + 1, len(points)):
+            p1 = points[i]
+            p2 = points[j]
+
+            area = abs(p1[0] - p2[0] + 1) * abs(p1[1] - p2[1] + 1)
+            m = max(m, area)
+
+    print(m)
+
+def task_9_2():
+    input = readInputFile('./input/input_9_test.txt')
+
+    points = []
+    for line in input:
+        points.append(list(map(lambda x: int(x), line.split(","))))
+    
+    m = 0
+
+    for i in range(len(points) - 1):
+        for j in range(i + 1, len(points)):
+            p1 = points[i]
+            p2 = points[j]
+
+            if i + 1 == j or (i == 0 and j == len(points) - 1):
+                area = abs(p1[0] - p2[0] + 1) * abs(p1[1] - p2[1] + 1)
+                m = max(m, area)
+                continue
+            
+
+            if p1[0] < p2[0]:
+                if p1[1] < p2[1]:
+                    # p1 is up-left corned, p2 is down-right corned
+                    # we need points outside these
+                    continue
+                elif p1[1] > p2[1]:
+                    # p1 is up-right corner, p2 is down-left corner
+                    continue
+                else:
+                    # p1 above, p2 below
+                    continue
+            elif p1[0] > p2[0]:
+                if p1[1] < p2[1]:
+                    # p1 is down-left corner, p2 is up-right corner
+                    continue
+                elif p1[1] > p2[1]:
+                    # p1 is down-right corner, p2 is up-left corner
+                    continue
+                else:
+                    # p2 above, p1 above
+                    continue
+            else:
+                if p1[1] < p2[1]:
+                    # p1 is left, p2 is right
+                    continue
+                elif p1[1] > p2[1]:
+                    # p2 is right, p1 is left
+                    continue
+                else:
+                    # same point, error
+                    continue
+
+    print(m)
+
+def task_10_1_get_next_state(current_state, transition):
+    new_state = list(current_state)
+
+    for n in transition:
+        if new_state[n] == '.':
+            new_state[n] = '#'
+        else:
+            new_state[n] = '.'
+
+    return ''.join(new_state)
+
+def task_10_1():
+    input = readInputFile('./input/input_10.txt')
+
+    sum_of_fewest = 0
+    for line in input:
+        # [.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}
+        tokens = line.split(" ")
+
+        end_state = tokens[0][1:-1]
+        transitions = list(map(lambda t: list(map(lambda n: int(n), t[1:-1].split(","))), tokens[1:-1]))
+
+        initial_state = "." * len(end_state)
+        queue = [[initial_state, 0]]
+        seen = {}
+        while queue:
+            [current_state, current_length] = queue.pop(0)
+
+            found = False
+            for t in transitions:
+                new_state = task_10_1_get_next_state(current_state, t)
+
+                if new_state == end_state:
+                    sum_of_fewest += current_length + 1
+                    found = True
+                    break
+
+                if seen.get(new_state):
+                    continue
+
+                seen[new_state] = True
+                queue.append([new_state, current_length + 1])
+            
+            if found:
+                break
+    
+    print(sum_of_fewest)
+
 def main():
-    task_8_2()
+    task_10_1()
 
 if __name__ == '__main__':
     main()
