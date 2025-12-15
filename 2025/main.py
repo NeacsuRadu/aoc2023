@@ -1,7 +1,7 @@
 from functools import reduce
 from mimetypes import init
 from re import A
-from turtle import left
+from turtle import left, right
 
 def readInputFile(path):
     result = []
@@ -653,7 +653,34 @@ def task_9_1():
 
     print(m)
 
-def task_9_2():
+def task_9_2_bad_check_rectangle(points, min_line, max_line, min_col, max_col, i, j):
+    for k in range(i + 1, len(points)):
+        if k == j:
+            continue
+
+        p3 = points[k]
+        if p3[1] > min_line and p3[1] < max_line and p3[0] > min_col and p3[0] < max_col:
+            print(f'{p3} is not good')
+            return False
+
+        # if p3[0] > min_col and p3[0] < max_col:
+        #     print(f'{p3} is not good')
+        #     return False
+    
+    if i > 0:
+        for k in range(i):
+            p3 = points[k]
+            if p3[1] > min_line and p3[1] < max_line and p3[0] > min_col and p3[0] < min_col:
+                print(f'{p3} is not good')
+                return False
+
+            # if p3[0] > min_col and p3[0] < max_col:
+            #     print(f'{p3} is not good')
+            #     return False
+    
+    return True
+
+def task_9_2_old():
     input = readInputFile('./input/input_9_test.txt')
 
     points = []
@@ -666,31 +693,55 @@ def task_9_2():
         for j in range(i + 1, len(points)):
             p1 = points[i]
             p2 = points[j]
+            print(f'checking p1 {p1} and p2 {p2}')
 
             if i + 1 == j or (i == 0 and j == len(points) - 1):
                 area = abs(p1[0] - p2[0] + 1) * abs(p1[1] - p2[1] + 1)
                 m = max(m, area)
                 continue
             
-
+            # 9,5 - 2, 3
             if p1[0] < p2[0]:
+                # p1 to the left of p2
                 if p1[1] < p2[1]:
-                    # p1 is up-left corned, p2 is down-right corned
-                    # we need points outside these
-                    continue
+                    # p1 is above p2
+                    # p1 is up-left corner
+                    
+                    min_line = p1[1]
+                    max_line = p2[1]
+
+                    min_col = p1[0]
+                    max_col = p2[0]
+
+                    good = task_9_2_bad_check_rectangle(points, min_line, max_line, min_col, max_col, i, j)
+                    if good:
+                        print(f'good, area: {area}')
+                        m = max(m, area)
                 elif p1[1] > p2[1]:
-                    # p1 is up-right corner, p2 is down-left corner
-                    continue
+                    # p1 is below p2
+                    # p1 is down-left corner
+                    good = task_9_2_bad_check_rectangle(points, p1[1], p2[1], p2[0], p1[0], i, j)
+                    if good:
+                        area = abs(p1[0] - p2[0] + 1) * abs(p1[1] - p2[1] + 1)
+                        print(f'good, area: {area}')
+                        m = max(m, area)
                 else:
                     # p1 above, p2 below
                     continue
             elif p1[0] > p2[0]:
                 if p1[1] < p2[1]:
-                    # p1 is down-left corner, p2 is up-right corner
-                    continue
+                    good = task_9_2_bad_check_rectangle(points, p1[1], p2[1], p2[0], p1[0], i, j)
+                    if good:
+                        area = abs(p1[0] - p2[0] + 1) * abs(p1[1] - p2[1] + 1)
+                        print(f'good, area: {area}')
+                        m = max(m, area)
                 elif p1[1] > p2[1]:
                     # p1 is down-right corner, p2 is up-left corner
-                    continue
+                    good = task_9_2_bad_check_rectangle(points, p2[1], p1[1], p2[0], p1[0], i, j)
+                    if good:
+                        area = abs(p1[0] - p2[0] + 1) * abs(p1[1] - p2[1] + 1)
+                        print(f'good, area: {area}')
+                        m = max(m, area)
                 else:
                     # p2 above, p1 above
                     continue
@@ -706,6 +757,93 @@ def task_9_2():
                     continue
 
     print(m)
+
+def task_9_2_check_left_right(a, b, c):
+    if a[1] == b[1]:
+        if a[0] < b[0]:
+            if b[0] != c[0] or b[1] == c[1]:
+                print('unexpected')
+                return 0
+            
+            if b[1] < c[1]:
+                return 1
+            
+            return -1
+        elif a[0] > b[0]:
+            if b[0] != c[0] or b[1] == c[1]:
+                print('unexpected')
+                return 0
+            
+            if b[1] < c[1]:
+                return -1
+            
+            return 1
+        else:
+            print('unexpected')
+            return 0
+    elif a[0] == b[0]:
+        if a[1] < b[1]:
+            if b[1] != c[1] or b[0] == c[0]:
+                print('expected')
+                return 0
+            
+            if b[0] < c[0]:
+                return -1
+            
+            return 1
+        elif a[1] > b[1]:
+            if b[1] != c[1] or b[0] == c[0]:
+                print('expected')
+                return 0
+
+            if b[0] < c[0]:
+                return 1
+            
+            return -1
+        else:
+            print('unexpected')
+            return 0
+    else:
+        print('unexpected')
+        return 0
+
+def task_9_2():
+    input = readInputFile('./input/input_9.txt')
+
+    points = []
+    for line in input:
+        points.append(list(map(lambda x: int(x), line.split(","))))
+
+    # n 0 1
+    # n-1 n 0
+
+    # left_turns = 0
+    # right_turns = 0
+
+    # for i in range(1, len(points) - 1):
+    #     a = points[i - 1]
+    #     b = points[i]
+    #     c = points[i + 1]
+
+    #     d = task_9_2_check_left_right(a, b, c)
+    #     if d < 0:
+    #         left_turns += 1
+    #     else:
+    #         right_turns += 1
+    
+    # d = task_9_2_check_left_right(points[len(points) - 2], points[len(points) - 1], points[0])
+    # if d < 0:
+    #     left_turns += 1
+    # else:
+    #     right_turns += 1
+
+    # d = task_9_2_check_left_right(points[len(points) - 1], points[0], points[1])
+    # if d < 0:
+    #     left_turns += 1
+    # else:
+    #     right_turns += 1
+
+    # print(f'{left_turns} left turns, {right_turns} right turns')
 
 def task_10_1_get_next_state(current_state, transition):
     new_state = list(current_state)
@@ -755,8 +893,90 @@ def task_10_1():
     
     print(sum_of_fewest)
 
+def task_11_1():
+    input = readInputFile('./input/input_11.txt')
+
+    nodes = {}
+
+    for line in input:
+        # aaa: you hhh
+        tokens = line.split(' ')
+
+        node = tokens[0][:-1]
+        nodes[node] = tokens[1:]
+    
+    start = 'svr'
+    end = 'out'
+    paths = 0
+
+    q = [start]
+    while q:
+        crt = q.pop(0)
+        print(crt)
+
+        next_nodes = nodes.get(crt)
+        if not next_nodes:
+            print(f'bad next nodes for {crt}')
+            return
+        
+        for next_node in next_nodes:
+            if next_node == end:
+                paths += 1
+                continue
+            
+            q.append(next_node)
+    
+    print(paths)
+
+def task_11_2():
+    # need to solve for cycles
+    input = readInputFile('./input/input_11.txt')
+
+    nodes = {}
+
+    for line in input:
+        # aaa: you hhh
+        tokens = line.split(' ')
+
+        node = tokens[0][:-1]
+        nodes[node] = tokens[1:]
+    
+    start = 'svr'
+    end = 'out'
+    paths = 0
+    dac = 'dac'
+    fft = 'fft'
+
+    q = [{'crt': start, 'dac_visited': False, 'fft_visited': False}]
+    while q:
+        crt = q.pop(0)
+        node = crt.get('crt')
+        dv = crt.get('dac_visited')
+        fv = crt.get('fft_visited')
+
+        next_nodes = nodes.get(node)
+        if not next_nodes:
+            print(f'bad next nodes for {crt}, {next_nodes}')
+            return
+        
+        for next_node in next_nodes:
+            if next_node == end:
+                if dv is True and fv is True:
+                    paths += 1
+                continue
+
+            next_dv = True if next_node == dac or dv is True else False
+            next_fv = True if next_node == fft or fv is True else False
+            q.append({'crt': next_node, 'dac_visited': next_dv, 'fft_visited': next_fv})
+    
+    print(paths)
+
+def task_12_1():
+    ##
+    return
+
 def main():
-    task_10_1()
+    task_11_1()
 
 if __name__ == '__main__':
     main()
